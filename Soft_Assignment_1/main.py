@@ -103,11 +103,11 @@ def genetic_algorithm(test_case, population_size):
 if __name__ == '__main__':
     input_file = 'input.txt'
     test_cases = read_file(input_file)
-    generation = 50
+    population_size = 50
     for i in range (3):
-        result = genetic_algorithm(test_cases[i], generation)
+        result = genetic_algorithm(test_cases[i], population_size)
         print(result)
-        generation += 100
+        population_size += 100
         print(test_cases[i])
     print('done')
 

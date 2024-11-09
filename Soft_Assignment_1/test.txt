@@ -1,0 +1,6 @@
+test_case[0] == max_time
+
+test_case[1] == task_time
+
+test_case[0][1] = [max_time[task_time]]
+fitnesses = [fitness(individual, test_case) for individual in population]

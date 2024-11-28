@@ -27,7 +27,31 @@ def readFromFile(filename):
     except Exception as e:
         return str(e)
     
+def checkprop(chromosome):
+    total_prop = 0
+    for gene in chromosome:
+        total_prop += gene
+    if (total_prop==100):
+        return True
+    else:
+        return False
     
+def calculate_cost(chromosome,costs):
+   total_cost =0
+   for gene,cost in chromosome,costs:
+       total_cost += gene * cost
+   return total_cost
+
+def tournament_selection(chromosome1,chromosome2,costs):
+    cost1 = calculate_cost(chromosome1,costs)
+    cost2 = calculate_cost(chromosome2,costs)
+    min_cost = min(cost1,cost2)
+    if(min_cost==cost1):
+        return chromosome1
+    else:
+        return chromosome2
+
+
 if __name__ == '__main__':
     content = readFromFile('input.txt')
     print(content[0][1])

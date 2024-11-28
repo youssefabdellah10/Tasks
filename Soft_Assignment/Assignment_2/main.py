@@ -1,4 +1,5 @@
 import random
+import math
 def readFromFile(filename):
     try:
         with open(filename,'r') as file:
@@ -63,12 +64,19 @@ def crossover(parent1, parent2):
         child2 = parent2
 
     return child1, child2
-def nonuniform_mutaion(chromosome,lower,upper):
- gene_index = random.randint(0,len(chromosome)-1)
- y =1
- chromosome [gene_index] = 1
- return chromosome
 
+def nonuniform_mutation(chromosome, lower, upper, t, T, b=1.5):
+    gene_index = random.randint(0, len(chromosome) - 1)
+    r1 = random.random()
+    if r1 <= 0.5:
+        delta = (chromosome[gene_index] - lower) * (1 - (t / T) ** b)
+        chromosome[gene_index] -= delta
+    else:
+        delta = (upper - chromosome[gene_index]) * (1 - (t / T) ** b)
+        chromosome[gene_index] += delta
+    
+    chromosome[gene_index] = max(min(chromosome[gene_index], upper), lower)
+    return chromosome
 
 
 

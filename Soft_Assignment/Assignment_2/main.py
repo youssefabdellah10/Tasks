@@ -1,3 +1,4 @@
+import random
 def readFromFile(filename):
     try:
         with open(filename,'r') as file:
@@ -27,11 +28,11 @@ def readFromFile(filename):
     except Exception as e:
         return str(e)
     
-def checkprop(chromosome):
+def checkprop(chromosome,upper):
     total_prop = 0
     for gene in chromosome:
         total_prop += gene
-    if (total_prop==100):
+    if (total_prop==upper):
         return True
     else:
         return False
@@ -50,6 +51,25 @@ def tournament_selection(chromosome1,chromosome2,costs):
         return chromosome1
     else:
         return chromosome2
+
+def crossover(parent1, parent2):
+    if len(parent1) > 2:
+        point1 = random.randint(1, len(parent1) - 2)
+        point2 = random.randint(point1 + 1, len(parent1) - 1)
+        child1 = parent1[:point1] + parent2[point1:point2] + parent1[point2:]
+        child2 = parent2[:point1] + parent1[point1:point2] + parent2[point2:]
+    else:
+        child1 = parent1
+        child2 = parent2
+
+    return child1, child2
+def nonuniform_mutaion(chromosome,lower,upper):
+ gene_index = random.randint(0,len(chromosome)-1)
+ y =1
+ chromosome [gene_index] = 1
+ return chromosome
+
+
 
 
 if __name__ == '__main__':

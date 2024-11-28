@@ -29,6 +29,22 @@ def readFromFile(filename):
     except Exception as e:
         return str(e)
     
+def chromosomeRepresentation(units):
+    chromosome = []
+    i=0
+    while i < len(units):
+        individual = round(random.uniform(units[i],units[i+1]), 1)
+        i += 2
+        chromosome.append(individual)
+    return chromosome
+
+def init_population(pop_size,units):
+    population = []
+    for _ in range(pop_size):
+        chromosome = chromosomeRepresentation(units)
+        population.append(chromosome)
+    return population
+    
 def checkprop(chromosome,upper):
     total_prop = 0
     for gene in chromosome:
@@ -38,20 +54,33 @@ def checkprop(chromosome,upper):
     else:
         return False
     
-def calculate_cost(chromosome,costs):
-   total_cost =0
-   for gene,cost in chromosome,costs:
-       total_cost += gene * cost
-   return total_cost
+def fitness(chromosome, costs):
+    total_cost = 0.0
+    total_genes = 0
+    for gene, cost in zip(chromosome, costs):
+        total_cost += gene * cost
+        total_genes += gene
+    diff = 100 - total_genes
+    total_cost = total_cost * diff 
+    return total_cost
 
-def tournament_selection(chromosome1,chromosome2,costs):
-    cost1 = calculate_cost(chromosome1,costs)
-    cost2 = calculate_cost(chromosome2,costs)
-    min_cost = min(cost1,cost2)
-    if(min_cost==cost1):
-        return chromosome1
-    else:
-        return chromosome2
+def calculate_cost(chromosome, costs):
+    total_cost = 0.0
+    for gene, cost in zip(chromosome, costs):
+        total_cost += gene * cost
+    return total_cost
+
+
+def tournament_selection(subset,costs):
+    while len(subset) > 1:
+        i = random.randint(0, len(subset) - 2)
+        cost1 = fitness(subset[i], costs)
+        cost2 = fitness(subset[i + 1], costs)
+        if cost1 <= cost2:
+            subset.pop(i + 1)
+        else:
+            subset.pop(i)
+    return subset[0]
 
 def crossover(parent1, parent2):
     if len(parent1) > 2:
@@ -65,21 +94,62 @@ def crossover(parent1, parent2):
 
     return child1, child2
 
-def nonuniform_mutation(chromosome, lower, upper, t, T, b=1.5):
+def nonuniform_mutation(chromosome, lower, upper, t, T):
+    b=1.5
     gene_index = random.randint(0, len(chromosome) - 1)
-    r1 = random.random()
+    r1 = random.randint(0, 1)
     if r1 <= 0.5:
-        delta = (chromosome[gene_index] - lower) * (1 - (t / T) ** b)
+        delta = (chromosome[gene_index] - lower) * (1 - r1**((1-t/ T) ** b))
         chromosome[gene_index] -= delta
     else:
-        delta = (upper - chromosome[gene_index]) * (1 - (t / T) ** b)
+        delta = (upper - chromosome[gene_index]) * (1 - r1**((1-t/ T) ** b))
         chromosome[gene_index] += delta
-    
-    chromosome[gene_index] = max(min(chromosome[gene_index], upper), lower)
+    chromosome[gene_index] = round(chromosome[gene_index], 1)
     return chromosome
 
+def elitism(population, fitnesses):
+    best_idx = fitnesses.index(min(fitnesses))
+    return population[best_idx]
 
+def geneticAlgorithm(boundary,units,costs,populationSize,generation):
+    new_population = []
+    population = init_population(populationSize,units)
+    for i in range(generation):
+        split_index = random.randint(1, populationSize - 1)
+        parent1_subset = population[:split_index]
+        parent2_subset = population[split_index:]
+        if not parent1_subset or not parent2_subset:
+            continue
+        parent1 = tournament_selection(parent1_subset, costs)
+        parent2 = tournament_selection(parent2_subset, costs)
+        child1, child2 = crossover(parent1, parent2)
+        nonuniform_mutation(child1, 0, boundary, i, generation)
+        nonuniform_mutation(child2, 0, boundary, i, generation)
+        new_population.append(child1)
+        new_population.append(child2)
+    return new_population      
+    
+def sum_genes(chromosome):
+    total = 0
+    for gene in chromosome:
+        total += gene
+    return total
+
+def dumb():
+    population = geneticAlgorithm(content, 1000, 100)
+    max_value = 0.0
+    best = []
+    for i in range(20):
+        current_value = sum_genes(population[i])
+        if current_value > max_value:
+            best = population[i]
+            max_value = current_value
+    print("Max value:", max_value, "Best chromosome:", best)
 
 if __name__ == '__main__':
     content = readFromFile('input.txt')
-    print(content[0][1])
+    for i in range(len(content)):
+        geneticAlgorithm(content[i][0][1],content[i][1],content[i][2],1000,100)
+
+    
+    

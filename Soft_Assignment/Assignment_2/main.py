@@ -44,15 +44,7 @@ def init_population(pop_size,units):
         chromosome = chromosomeRepresentation(units)
         population.append(chromosome)
     return population
-    
-def checkprop(chromosome,upper):
-    total_prop = 0
-    for gene in chromosome:
-        total_prop += gene
-    if (total_prop==upper):
-        return True
-    else:
-        return False
+
     
 def fitness(chromosome, costs, boundary):
     weight = 0.0
@@ -101,22 +93,26 @@ def crossover(parent1, parent2):
 
     return child1, child2
 
-def nonuniform_mutation(chromosome, lower, upper, t, T):
+def nonuniform_mutation(chromosome, lower, upper , t, T):
     b=1.5
     gene_index = random.randint(0, len(chromosome) - 1)
-    r1 = random.randint(0, 1)
+    r1 = random.random()
     if r1 <= 0.5:
         delta = (chromosome[gene_index] - lower) * (1 - r1**((1-t/ T) ** b))
-        chromosome[gene_index] -= delta
+        chromosome[gene_index] = delta
     else:
         delta = (upper - chromosome[gene_index]) * (1 - r1**((1-t/ T) ** b))
-        chromosome[gene_index] += delta
-    chromosome[gene_index] = round(chromosome[gene_index], 1)
+        chromosome[gene_index] = delta
+    chromosome[gene_index] = round(chromosome[gene_index], 2)
     return chromosome
 
 def elitism(population, fitnesses):
     best_idx = fitnesses.index(min(fitnesses))
     return population[best_idx]
+
+    
+        
+        
 
 def geneticAlgorithm(boundary, units, costs, populationSize, generation):
     population = init_population(populationSize, units)
@@ -125,19 +121,19 @@ def geneticAlgorithm(boundary, units, costs, populationSize, generation):
         split_index = random.randint(1, populationSize - 1)
         parent1_subset = population[:split_index]
         parent2_subset = population[split_index:]
-        if not parent1_subset or not parent2_subset:
-            continue
         fitnesses = [fitness(chromosome, costs, boundary) for chromosome in population]
         parent1 = tournament_selection(parent1_subset, costs, boundary)
         parent2 = tournament_selection(parent2_subset, costs, boundary)
         child1, child2 = crossover(parent1, parent2)
-        nonuniform_mutation(child1, 0, boundary, i, generation)
-        nonuniform_mutation(child2, 0, boundary, i, generation)
+        child1 = nonuniform_mutation(child1, child1[0],child1[len(child1)-1], i, generation)
+        child2 = nonuniform_mutation(child2, child2[0],child2[len(child2)-1], i, generation)
         population.append(child1)
         population.append(child2)
         new_population.append(elitism(population, fitnesses))
         while len(new_population) < populationSize:
-            new_population.append(random.choice(population))
+            x = random.choice(population)
+            new_population.append(x)
+            population.remove(x)
         population = new_population[:]
         
     return population
@@ -151,7 +147,7 @@ def writeToFile(filename, index, units,total_cost):
 def getTheOptimal(population,cost,generation):
     best_max = 0.0
     best = []
-    for i in range(generation):
+    for i in range(len(population)):
         current_value = sum_genes(population[i])
         if current_value > best_max:
             best = population[i]
@@ -163,7 +159,7 @@ if __name__ == '__main__':
     content = readFromFile('input.txt')
     optimal = []
     best_costs = 0.0
-    generation = 500
+    generation = 100
     sum = 0.0
     for i in range(len(content)):
         population = geneticAlgorithm(content[i][0][1],content[i][1],content[i][2],1000,generation)
@@ -171,9 +167,18 @@ if __name__ == '__main__':
         writeToFile('output.txt',i,best,best_cost)
         for _ in range(len(best)):
             sum += best[_]
-        print("best cost", best_cost, "best", sum)
+        print(f"Dataset: {i+1}")
+        print(f"Chemical Proportions: {best}")  
+        print(f"Total Cost: {best_cost}") 
+        print( "Total Proportion", sum)
+        if(sum == content[i][0][1]):
+            print("feasible solution")
+        else:
+            print("infeasible solution")
+        
         best_cost = 0.0
         best = []
+        sum= 0  
         
         
 

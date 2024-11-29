@@ -54,15 +54,16 @@ def checkprop(chromosome,upper):
     else:
         return False
     
-def fitness(chromosome, costs):
-    total_cost = 0.0
+def fitness(chromosome, costs, boundary):
+    weight = 0.0
     total_genes = 0
+    diff = 0.0
     for gene, cost in zip(chromosome, costs):
-        total_cost += gene * cost
+        weight += gene * cost
         total_genes += gene
-    diff = 100 - total_genes
-    total_cost = total_cost * diff 
-    return total_cost
+    penalty = 100 * abs(total_genes - boundary) 
+    fitness = weight * penalty
+    return fitness
 
 def calculate_cost(chromosome, costs):
     total_cost = 0.0
@@ -71,11 +72,11 @@ def calculate_cost(chromosome, costs):
     return total_cost
 
 
-def tournament_selection(subset,costs):
+def tournament_selection(subset,costs,boundary):
     while len(subset) > 1:
         i = random.randint(0, len(subset) - 2)
-        cost1 = fitness(subset[i], costs)
-        cost2 = fitness(subset[i + 1], costs)
+        cost1 = fitness(subset[i], costs, boundary)
+        cost2 = fitness(subset[i + 1], costs,boundary)
         if cost1 <= cost2:
             subset.pop(i + 1)
         else:
@@ -114,19 +115,23 @@ def elitism(population, fitnesses):
 def geneticAlgorithm(boundary,units,costs,populationSize,generation):
     new_population = []
     population = init_population(populationSize,units)
+    fitnesses = []
     for i in range(generation):
         split_index = random.randint(1, populationSize - 1)
         parent1_subset = population[:split_index]
         parent2_subset = population[split_index:]
         if not parent1_subset or not parent2_subset:
             continue
-        parent1 = tournament_selection(parent1_subset, costs)
-        parent2 = tournament_selection(parent2_subset, costs)
+        fitnesses = [fitness(chromosome, costs, boundary) for chromosome in population]
+        parent1 = tournament_selection(parent1_subset, costs, boundary)
+        parent2 = tournament_selection(parent2_subset, costs, boundary)
         child1, child2 = crossover(parent1, parent2)
         nonuniform_mutation(child1, 0, boundary, i, generation)
         nonuniform_mutation(child2, 0, boundary, i, generation)
-        new_population.append(child1)
-        new_population.append(child2)
+        population.append(child1)
+        population.append(child2)
+        new_population.append(elitism(population, fitnesses))
+        
     return new_population      
     
 def sum_genes(chromosome):
@@ -135,21 +140,20 @@ def sum_genes(chromosome):
         total += gene
     return total
 
-def dumb():
-    population = geneticAlgorithm(content, 1000, 100)
-    max_value = 0.0
-    best = []
-    for i in range(20):
-        current_value = sum_genes(population[i])
-        if current_value > max_value:
-            best = population[i]
-            max_value = current_value
-    print("Max value:", max_value, "Best chromosome:", best)
-
 if __name__ == '__main__':
     content = readFromFile('input.txt')
     for i in range(len(content)):
-        geneticAlgorithm(content[i][0][1],content[i][1],content[i][2],1000,100)
+        population = geneticAlgorithm(content[i][0][1],content[i][1],content[i][2],1000,200)
+        max_value = 0.0
+        best = []
+        for i in range(20):
+            current_value = sum_genes(population[i])
+            if current_value > max_value:
+                best = population[i]
+                max_value = current_value
+        print("Max value:", max_value, "Best chromosome:", best)
+        
+
 
     
     

@@ -29,6 +29,9 @@ def readFromFile(filename):
     except Exception as e:
         return str(e)
     
+
+        
+
 def chromosomeRepresentation(units):
     chromosome = []
     i=0
@@ -44,7 +47,6 @@ def init_population(pop_size,units):
         chromosome = chromosomeRepresentation(units)
         population.append(chromosome)
     return population
-
     
 def fitness(chromosome, costs, boundary):
     weight = 0.0
@@ -53,7 +55,7 @@ def fitness(chromosome, costs, boundary):
     for gene, cost in zip(chromosome, costs):
         weight += gene * cost
         total_genes += gene
-    penalty = 1000 * math.exp(abs(total_genes - boundary))
+    penalty = 100 * math.exp(abs(total_genes - boundary))
     fitness = weight + penalty
     return fitness
 
@@ -94,7 +96,7 @@ def crossover(parent1, parent2):
     return child1, child2
 
 def nonuniform_mutation(chromosome, lower, upper , t, T):
-    b=1.5
+    b=3.5
     gene_index = random.randint(0, len(chromosome) - 1)
     r1 = random.random()
     if r1 <= 0.5:
@@ -106,9 +108,9 @@ def nonuniform_mutation(chromosome, lower, upper , t, T):
     chromosome[gene_index] = round(chromosome[gene_index], 2)
     return chromosome
 
-def elitism(population, fitnesses):
+def elitism(fitnesses):
     best_idx = fitnesses.index(min(fitnesses))
-    return population[best_idx]
+    return best_idx
 
     
         
@@ -118,19 +120,20 @@ def geneticAlgorithm(boundary, units, costs, populationSize, generation):
     population = init_population(populationSize, units)
     for i in range(generation):
         new_population = []
-        split_index = random.randint(1, populationSize - 1)
+        fitnesses = [fitness(chromosome, costs, boundary) for chromosome in population]
+        new_population.append(population[elitism(fitnesses)])
+        population.remove(population[elitism(fitnesses)])
+        split_index = len(population) // 2
         parent1_subset = population[:split_index]
         parent2_subset = population[split_index:]
-        fitnesses = [fitness(chromosome, costs, boundary) for chromosome in population]
         parent1 = tournament_selection(parent1_subset, costs, boundary)
         parent2 = tournament_selection(parent2_subset, costs, boundary)
         child1, child2 = crossover(parent1, parent2)
         child1 = nonuniform_mutation(child1, child1[0],child1[len(child1)-1], i, generation)
         child2 = nonuniform_mutation(child2, child2[0],child2[len(child2)-1], i, generation)
-        population.append(child1)
-        population.append(child2)
-        new_population.append(elitism(population, fitnesses))
-        while len(new_population) < populationSize:
+        new_population.append(child1)
+        new_population.append(child2)
+        while len(new_population) < len(population):
             x = random.choice(population)
             new_population.append(x)
             population.remove(x)

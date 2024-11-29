@@ -121,3 +121,147 @@ Total Cost: 707.22
 Dataset: 1
 Chemical Proportions: [24.2, 37.2, 34.0]
 Total Cost: 701.54
+Dataset: 1
+Chemical Proportions: [22.4, 38.4, 32.9]
+Total Cost: 685.0999999999999
+Dataset: 1
+Chemical Proportions: [23.1, 39.2, 34.7]
+Total Cost: 710.0500000000001
+Dataset: 1
+Chemical Proportions: [21.6, 39.3, 33.3]
+Total Cost: 687.0
+Dataset: 1
+Chemical Proportions: [24.5, 38.8, 33.6]
+Total Cost: 710.89
+Dataset: 1
+Chemical Proportions: [22.7, 37.7, 34.6]
+Total Cost: 696.57
+Dataset: 1
+Chemical Proportions: [25.0, 25.0, 40.0]
+Total Cost: 679.5
+Dataset: 1
+Chemical Proportions: [25.0, 25.0, 40.0]
+Total Cost: 679.5
+Dataset: 1
+Chemical Proportions: [25.0, 25.0, 40.0]
+Total Cost: 679.5
+Dataset: 1
+Chemical Proportions: [25.0, 25.0, 40.0]
+Total Cost: 679.5
+Dataset: 1
+Chemical Proportions: [25.0, 25.0, 40.0]
+Total Cost: 679.5
+Dataset: 1
+Chemical Proportions: [23.0, 38.2, 33.8]
+Total Cost: 695.98
+Dataset: 1
+Chemical Proportions: [22.7, 39.0, 34.9]
+Total Cost: 706.97
+Dataset: 1
+Chemical Proportions: [23.7, 38.3, 31.9]
+Total Cost: 687.73
+Dataset: 1
+Chemical Proportions: [23.6, 38.3, 35.0]
+Total Cost: 711.06
+Dataset: 1
+Chemical Proportions: [24.7, 38.0, 34.8]
+Total Cost: 716.99
+Dataset: 1
+Chemical Proportions: [22.1, 39.9, 34.0]
+Total Cost: 700.4300000000001
+Dataset: 1
+Chemical Proportions: [23.7, 39.6, 34.3]
+Total Cost: 714.51
+Dataset: 1
+Chemical Proportions: [22.2, 38.3, 33.4]
+Total Cost: 686.68
+Dataset: 1
+Chemical Proportions: [23.6, 38.5, 32.8]
+Total Cost: 695.1400000000001
+Dataset: 1
+Chemical Proportions: [24.9, 38.1, 33.4]
+Total Cost: 708.39
+Dataset: 1
+Chemical Proportions: [24.5, 38.2, 33.1]
+Total Cost: 703.27
+Dataset: 1
+Chemical Proportions: [24.6, 40.0, 34.1]
+Total Cost: 723.08
+Dataset: 1
+Chemical Proportions: [23.7, 37.4, 34.2]
+Total Cost: 700.0899999999999
+Dataset: 1
+Chemical Proportions: [24.0, 39.9, 34.2]
+Total Cost: 718.14
+Dataset: 1
+Chemical Proportions: [21.9, 39.6, 33.7]
+Total Cost: 694.53
+Dataset: 1
+Chemical Proportions: [23.6, 39.6, 34.5]
+Total Cost: 715.22
+Dataset: 1
+Chemical Proportions: [23.6, 39.7, 33.8]
+Total Cost: 710.38
+Dataset: 1
+Chemical Proportions: []
+Total Cost: 0.0
+Dataset: 1
+Chemical Proportions: []
+Total Cost: 0.0
+Dataset: 1
+Chemical Proportions: [21.9, 39.6, 32.5]
+Total Cost: 685.17
+Dataset: 1
+Chemical Proportions: []
+Total Cost: 0.0
+Dataset: 1
+Chemical Proportions: []
+Total Cost: 0.0
+Dataset: 1
+Chemical Proportions: []
+Total Cost: 0.0
+Dataset: 1
+Chemical Proportions: [23.8, 38.2, 34.1]
+Total Cost: 705.1200000000001
+Dataset: 1
+Chemical Proportions: [22.1, 39.8, 34.8]
+Total Cost: 706.05
+Dataset: 1
+Chemical Proportions: [24.5, 36.6, 33.8]
+Total Cost: 698.81
+Dataset: 1
+Chemical Proportions: [24.4, 39.5, 33.3]
+Total Cost: 712.04
+Dataset: 1
+Chemical Proportions: [23.3, 39.3, 33.8]
+Total Cost: 705.35
+Dataset: 1
+Chemical Proportions: [24.6, 39.8, 34.2]
+Total Cost: 722.62
+Dataset: 1
+Chemical Proportions: [24.1, 39.7, 33.0]
+Total Cost: 708.39
+Dataset: 1
+Chemical Proportions: [22.9, 38.4, 34.5]
+Total Cost: 701.8299999999999
+Dataset: 1
+Chemical Proportions: [13.3, 36.9, 29.8]
+Total Cost: 574.27
+Dataset: 1
+Chemical Proportions: [11.5, 39.0, 29.5]
+Total Cost: 569.65
+Dataset: 1
+Chemical Proportions: [18.5, 29.9, 31.5]
+Total Cost: 588.3299999999999
+Dataset: 1
+Chemical Proportions: [8.7, 39.9, 31.5]
+Total Cost: 567.03
+Dataset: 1
+Chemical Proportions: [18.6, 39.9, 21.6]
+Total Cost: 573.96
+Dataset: 1
+Chemical Proportions: [14.9, 33.7, 31.2]
+Total Cost: 578.95
+Dataset: 1
+Chemical Proportions: [18.4, 39.9, 21.7]
+Total Cost: 573.04

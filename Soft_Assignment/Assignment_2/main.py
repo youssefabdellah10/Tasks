@@ -56,13 +56,13 @@ def checkprop(chromosome,upper):
     
 def fitness(chromosome, costs, boundary):
     weight = 0.0
-    total_genes = 0
-    diff = 0.0
+    total_genes = 0.0
+    penalty = 0.0
     for gene, cost in zip(chromosome, costs):
         weight += gene * cost
         total_genes += gene
-    penalty = 100 * abs(total_genes - boundary) 
-    fitness = weight * penalty
+    penalty = 1000 * math.exp(abs(total_genes - boundary))
+    fitness = weight + penalty
     return fitness
 
 def calculate_cost(chromosome, costs):
@@ -70,6 +70,12 @@ def calculate_cost(chromosome, costs):
     for gene, cost in zip(chromosome, costs):
         total_cost += gene * cost
     return total_cost
+
+def sum_genes(chromosome):
+    total = 0
+    for gene in chromosome:
+        total += gene
+    return total
 
 
 def tournament_selection(subset,costs,boundary):
@@ -112,11 +118,10 @@ def elitism(population, fitnesses):
     best_idx = fitnesses.index(min(fitnesses))
     return population[best_idx]
 
-def geneticAlgorithm(boundary,units,costs,populationSize,generation):
-    new_population = []
-    population = init_population(populationSize,units)
-    fitnesses = []
+def geneticAlgorithm(boundary, units, costs, populationSize, generation):
+    population = init_population(populationSize, units)
     for i in range(generation):
+        new_population = []
         split_index = random.randint(1, populationSize - 1)
         parent1_subset = population[:split_index]
         parent2_subset = population[split_index:]
@@ -131,27 +136,45 @@ def geneticAlgorithm(boundary,units,costs,populationSize,generation):
         population.append(child1)
         population.append(child2)
         new_population.append(elitism(population, fitnesses))
+        while len(new_population) < populationSize:
+            new_population.append(random.choice(population))
+        population = new_population[:]
         
-    return new_population      
-    
-def sum_genes(chromosome):
-    total = 0
-    for gene in chromosome:
-        total += gene
-    return total
+    return population
 
+def writeToFile(filename, index, units,total_cost):
+    with open(filename, 'a') as file:
+        file.write(f"Dataset: {index+1}\n")
+        file.write(f"Chemical Proportions: {units}\n")  
+        file.write(f"Total Cost: {total_cost}\n") 
+        
+def getTheOptimal(population,cost,generation):
+    best_max = 0.0
+    best = []
+    for i in range(generation):
+        current_value = sum_genes(population[i])
+        if current_value > best_max:
+            best = population[i]
+            best_max = current_value
+    cost_ = calculate_cost(best,cost)
+    return best,cost_
+    
 if __name__ == '__main__':
     content = readFromFile('input.txt')
+    optimal = []
+    best_costs = 0.0
+    generation = 500
+    sum = 0.0
     for i in range(len(content)):
-        population = geneticAlgorithm(content[i][0][1],content[i][1],content[i][2],1000,200)
-        max_value = 0.0
+        population = geneticAlgorithm(content[i][0][1],content[i][1],content[i][2],1000,generation)
+        best, best_cost = getTheOptimal(population,content[i][2],generation)
+        writeToFile('output.txt',i,best,best_cost)
+        for _ in range(len(best)):
+            sum += best[_]
+        print("best cost", best_cost, "best", sum)
+        best_cost = 0.0
         best = []
-        for i in range(20):
-            current_value = sum_genes(population[i])
-            if current_value > max_value:
-                best = population[i]
-                max_value = current_value
-        print("Max value:", max_value, "Best chromosome:", best)
+        
         
 
 

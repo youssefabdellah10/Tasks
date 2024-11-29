@@ -1,0 +1,6 @@
+Dataset: 1
+Chemical Proportions: [22.2, 39.2, 32.7]
+Total Cost: 686.8
+Dataset: 2
+Chemical Proportions: [18.3, 29.2, 29.7]
+Total Cost: 568.25

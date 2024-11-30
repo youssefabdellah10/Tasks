@@ -121,8 +121,6 @@ def geneticAlgorithm(boundary, units, costs, populationSize, generation):
     for i in range(generation):
         new_population = []
         fitnesses = [fitness(chromosome, costs, boundary) for chromosome in population]
-        new_population.append(population[elitism(fitnesses)])
-        population.remove(population[elitism(fitnesses)])
         split_index = len(population) // 2
         parent1_subset = population[:split_index]
         parent2_subset = population[split_index:]
@@ -133,6 +131,7 @@ def geneticAlgorithm(boundary, units, costs, populationSize, generation):
         child2 = nonuniform_mutation(child2, child2[0],child2[len(child2)-1], i, generation)
         new_population.append(child1)
         new_population.append(child2)
+        new_population.append(population[elitism(fitnesses)])
         while len(new_population) < len(population):
             x = random.choice(population)
             new_population.append(x)

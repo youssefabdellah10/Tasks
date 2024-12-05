@@ -62,13 +62,16 @@ Target_train_encoded = label_encoder.fit_transform(train_target)
 Target_test_encoded = label_encoder.transform(test_target)
 
 
-classifier_of_DecisionTree = DecisionTreeClassifier(max_depth=4 , random_state=33)
+classifier_of_DecisionTree = DecisionTreeClassifier( criterion= 'gini',max_depth=4 , random_state=33)
 classifier_of_DecisionTree.fit(train_feutures, Target_train_encoded)  
 y_pred_dt = classifier_of_DecisionTree.predict(test_feutures)
 
-classifier_of_Knn = KNeighborsClassifier(n_neighbors=3)
-classifier_of_Knn.fit(train_feutures, Target_train_encoded)  
-y_pred_knn = classifier_of_Knn.predict(test_feutures)
+def knn(k):
+ classifier_of_Knn = KNeighborsClassifier(n_neighbors=3)
+ classifier_of_Knn.fit(train_feutures, Target_train_encoded)  
+ y_pred_knn = classifier_of_Knn.predict(test_feutures)
+ accuracy_of_Knn, precision_of_Knn,recall_of_Knn = evaluate_model(Target_test_encoded, y_pred_knn)
+ return accuracy_of_Knn, precision_of_Knn,recall_of_Knn
 
 classifier_of_NaïveBayes = GaussianNB()
 classifier_of_NaïveBayes.fit(train_feutures, Target_train_encoded) 
@@ -83,12 +86,12 @@ def evaluate_model(y_true, y_pred):
 
 accuracy_of_DecisionTree, precision_of_DecisionTree, recall_of_DecisionTree = evaluate_model(Target_test_encoded, y_pred_dt)
 
-accuracy_of_Knn, precision_of_Knn,recall_of_Knn = evaluate_model(Target_test_encoded, y_pred_knn)
+
 
 
 accuracy_of_NaïveBayes, precision_of_NaïveBayes, recall_of_NaïveBayes = evaluate_model(Target_test_encoded, y_pred_nb)
 
-
+accuracy_of_Knn, precision_of_Knn,recall_of_Knn = knn(3)
 print(f"\nDecision Tree Classifier - Accuracy: {round(accuracy_of_DecisionTree,3)}, Precision: {round(precision_of_DecisionTree,3)}, Recall: {round(recall_of_DecisionTree,3)}")
 print(f"kNN Classifier - Accuracy: {round(accuracy_of_Knn,3)}, Precision: {round(precision_of_Knn,3)}, Recall: {round(recall_of_Knn,3)}")
 print(f"Naïve Bayes Classifier - Accuracy: {round(accuracy_of_NaïveBayes,3)}, Precision: {round(precision_of_NaïveBayes,3)}, Recall: {round(recall_of_NaïveBayes,3)}")
@@ -119,9 +122,6 @@ plt.tight_layout()
 plt.show()
 
 # 4. kNN from Scratch
-def euclidean_distance(x1, x2):
-    return np.sqrt(np.sum((x1 - x2) ** 2))
-
 def knn_from_scratch(X_train, X_test, k=3):
     predictions = []
     
@@ -146,19 +146,27 @@ y_pred_knn_custom_decoded = label_encoder.inverse_transform(y_pred_knn_custom)
 
 knn_custom_accuracy, knn_custom_precision, knn_custom_recall = evaluate_model(test_target, y_pred_knn_custom_decoded)
 
-print(f"\nCustom kNN from Scratch - Accuracy: {round(knn_custom_accuracy,3)}, Precision: {round(knn_custom_precision,3)}, Recall: {round(knn_custom_recall,3)}")
+#print(f"\nCustom kNN from Scratch - Accuracy: {round(knn_custom_accuracy,3)}, Precision: {round(knn_custom_precision,3)}, Recall: {round(knn_custom_recall,3)}")
 print(f"\nComparison between custom kNN and scikit-learn kNN:")
-print(f"Scikit-learn kNN - Accuracy: {round(accuracy_of_Knn,3)}, Precision: {round(precision_of_Knn,3)}, Recall: {round(recall_of_Knn,3)}")
-print(f"Custom kNN - Accuracy: {round(knn_custom_accuracy,3)}, Precision: {round(knn_custom_precision,3)}, Recall: {round(knn_custom_recall,3)}")
+#print(f"Scikit-learn kNN - Accuracy: {round(accuracy_of_Knn,3)}, Precision: {round(precision_of_Knn,3)}, Recall: {round(recall_of_Knn,3)}")
+#print(f"Custom kNN - Accuracy: {round(knn_custom_accuracy,3)}, Precision: {round(knn_custom_precision,3)}, Recall: {round(knn_custom_recall,3)}")
 
 plt.figure(figsize=(15,10))
 plot_tree(classifier_of_DecisionTree, filled=True, feature_names=Feutures.columns, class_names=['No Rain', 'Rain'])
 plt.show()
 
 k_values = [1, 3, 5, 7, 9]
+ # for custom KNN 
 for k in k_values:
     y_pred_knn_custom = knn_from_scratch(train_feutures,test_feutures, k)
+
     y_pred_knn_custom_decoded = label_encoder.inverse_transform(y_pred_knn_custom)
     knn_custom_accuracy, knn_custom_precision, knn_custom_recall = evaluate_model(test_target, y_pred_knn_custom_decoded)
     round(knn_custom_precision,3)
     print(f"Custom kNN (k={k}) - Accuracy: {round(knn_custom_accuracy,3)}, Precision: {round(knn_custom_precision,3)}, Recall: {round(knn_custom_recall,3)}")
+
+# for scikit-learn KNN 
+print("=========================================================")
+for k in k_values:
+    accuracy_of_Knn, precision_of_Knn,recall_of_Knn = knn(k)
+    print(f"scikit-learn kNN (k={k}) - Accuracy: {round(knn_custom_accuracy,3)}, Precision: {round(knn_custom_precision,3)}, Recall: {round(knn_custom_recall,3)}")

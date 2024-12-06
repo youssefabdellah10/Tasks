@@ -67,7 +67,7 @@ classifier_of_DecisionTree.fit(train_feutures, Target_train_encoded)
 y_pred_dt = classifier_of_DecisionTree.predict(test_feutures)
 
 def knn(k):
- classifier_of_Knn = KNeighborsClassifier(n_neighbors=3)
+ classifier_of_Knn = KNeighborsClassifier(k)
  classifier_of_Knn.fit(train_feutures, Target_train_encoded)  
  y_pred_knn = classifier_of_Knn.predict(test_feutures)
  accuracy_of_Knn, precision_of_Knn,recall_of_Knn = evaluate_model(Target_test_encoded, y_pred_knn)
@@ -169,4 +169,4 @@ for k in k_values:
 print("=========================================================")
 for k in k_values:
     accuracy_of_Knn, precision_of_Knn,recall_of_Knn = knn(k)
-    print(f"scikit-learn kNN (k={k}) - Accuracy: {round(knn_custom_accuracy,3)}, Precision: {round(knn_custom_precision,3)}, Recall: {round(knn_custom_recall,3)}")
+    print(f"scikit-learn kNN (k={k}) - Accuracy: {round(accuracy_of_Knn,3)}, Precision: {round(precision_of_Knn,3)}, Recall: {round(recall_of_Knn,3)}")

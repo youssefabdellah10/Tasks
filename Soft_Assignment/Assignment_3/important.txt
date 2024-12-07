@@ -1,0 +1,17 @@
+variables_map = {
+    'proj_funding': {'type': 'IN', 'range': [0, 100],'sets': {
+        'very_low': {'type': 'TRAP', 'range': [0, 0, 10, 30]},
+        'low': {'type': 'TRAP', 'range': [10, 30, 40, 60]},
+        'medium': {'type': 'TRAP', 'range': [40, 60, 70, 90]},
+        'high': {'type': 'TRAP', 'range': [70, 90, 100, 100]}}, 'crisp': 50},
+    'exp_level': {'type': 'IN', 'range': [0, 60], 'sets': {
+        'beginner': {'type': 'TRI', 'range': [0, 15, 30]},
+        'intermediate': {'type': 'TRI', 'range': [15, 30, 45]},
+        'expert': {'type': 'TRI', 'range': [30, 60, 60]}
+    }, 'crisp': 40},
+    'risk': {'type': 'OUT', 'range': [0, 100], 'sets': {
+        'low': {'type': 'TRI', 'range': [0, 25, 50]},
+        'normal': {'type': 'TRI', 'range': [25, 50, 75]},
+        'high': {'type': 'TRI', 'range': [50, 100, 100]}
+    }, 'crisp': 0}
+}

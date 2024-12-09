@@ -15,3 +15,12 @@ variables_map = {
         'high': {'type': 'TRI', 'range': [50, 100, 100]}
     }, 'crisp': 0}
 }
+
+
+rules = [
+    {'if': {'or': [{'proj_funding': 'high'}, {'exp_level': 'expert'}]}, 'then': {'risk': 'low'}},
+    {'if': {'and': [{'proj_funding': 'medium'}, {'exp_level': 'intermediate'}]}, 'then': {'risk': 'normal'}},
+    {'if': {'and': [{'proj_funding': 'medium'}, {'exp_level': 'beginner'}]}, 'then': {'risk': 'normal'}},
+    {'if': {'and': [{'proj_funding': 'low'}, {'exp_level': 'beginner'}]}, 'then': {'risk': 'high'}},
+    {'if': {'and': [{'proj_funding': 'very_low'}, {'not': {'exp_level': 'expert'}}]}, 'then': {'risk': 'high'}}
+]

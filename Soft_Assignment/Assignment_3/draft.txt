@@ -6,6 +6,8 @@
         {'if': {'and': [{'proj_funding': 'very_low'}, {'not': {'exp_level': 'expert'}}]}, 'then': {'risk': 'high'}}
     ]
 
+    {'if': {'and': [{'proj_funding': 'very_low'}, {'not': {'exp_level': 'expert'}}]}, 'then': {'risk': 'high'}}
+
 
     variables_map = {
     'proj_funding': {'type': 'IN', 'range': [0, 100],'sets': {
@@ -38,3 +40,5 @@
 
     print(f"The predicted risk is {max(inferred_values['risk'])} {defuzzification(variables_map,inferred_values,'risk')}")
     
+
+amount_dirt small and_not fabric soft or amount_dirt medium and fabric soft => wash_time small

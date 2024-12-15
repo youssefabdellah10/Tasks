@@ -1,12 +1,14 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApp, getApps } from "firebase/app";
 import { getDatabase } from "firebase/database";
-import { getMessaging, getToken, onMessage } from "firebase/messaging";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { 
+  getMessaging, 
+  getToken, 
+  onMessage 
+} from "firebase/messaging";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
+
+// Web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyC4Lz8EiN3VS1WxLQSR65voYyaCQd8pwEo",
   authDomain: "fir-app-2decf.firebaseapp.com",
@@ -18,9 +20,66 @@ const firebaseConfig = {
   measurementId: "G-JVDDP9B637"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Singleton Firebase App Initialization
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+
+// Initialize services
 const db = getDatabase(app);
 const messaging = getMessaging(app);
 
-export {db, messaging , getToken, onMessage};
+
+const subscribeToTopic = async (messaging, token, topic) => {
+  try {
+    const response = await fetch(`https://iid.googleapis.com/iid/v1/${token}/rel/topics/${topic}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'key=BEY05QN2X2l_7deZkUPxoASg4Au3zC32XmYv1O9KYtI9gduoX2Qc-S9X_QQC9CCysfscoCSiH0kAA5wDXv0eWIQ', // Replace with your actual Firebase Server Key
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to subscribe to topic');
+    }
+    return response;
+  } catch (error) {
+    console.error('Error subscribing to topic:', error);
+    throw error;
+  }
+};
+
+const unsubscribeFromTopic = async (messaging, token, topic) => {
+  try {
+    const response = await fetch(`https://iid.googleapis.com/iid/v1/${token}/rel/topics/${topic}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': 'key=BEY05QN2X2l_7deZkUPxoASg4Au3zC32XmYv1O9KYtI9gduoX2Qc-S9X_QQC9CCysfscoCSiH0kAA5wDXv0eWIQ',
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to unsubscribe from topic');
+    }
+    return response;
+  } catch (error) {
+    console.error('Error unsubscribing from topic:', error);
+    throw error;
+  }
+};
+
+
+
+export { 
+  app, 
+  messaging, 
+  getToken, 
+  onMessage,
+  subscribeToTopic,
+  unsubscribeFromTopic,
+  db
+};
+
+
+
+

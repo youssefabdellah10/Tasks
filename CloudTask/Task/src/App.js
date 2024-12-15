@@ -10,7 +10,7 @@ function App() {
         <Routes>
           <Route path="/" element={<GroupForm />} />
           <Route path="/list" element={<GroupList />} />
-          <Route path="/msg" element={<Msg/>} />
+          <Route path="/msg" element={<Msg />} />
         </Routes>
       </Router>
     </div>

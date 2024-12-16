@@ -1,39 +1,28 @@
-importScripts('https://www.gstatic.com/firebasejs/9.17.2/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/9.17.2/firebase-messaging-compat.js');
+// Scripts for firebase and firebase messaging
+importScripts('https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging-compat.js');
 
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyC4Lz8EiN3VS1WxLQSR65voYyaCQd8pwEo",
-  authDomain: "fir-app-2decf.firebaseapp.com",
-  databaseURL: "https://fir-app-2decf-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "fir-app-2decf",
-  storageBucket: "fir-app-2decf.appspot.com",
-  messagingSenderId: "727647863772",
-  appId: "1:727647863772:web:28efd54cf1eb14a52a0519",
-  measurementId: "G-JVDDP9B637"
-};
+// Initialize the Firebase app
+firebase.initializeApp({
+  apiKey: "AIzaSyDyxAW2bCOjBbxRTrT8PR02TMr429OYHBM",
+  authDomain: "lab-project-4325e.firebaseapp.com",
+  projectId: "lab-project-4325e",
+  storageBucket: "lab-project-4325e.firebasestorage.app",
+  messagingSenderId: "14870600503",
+  appId: "1:14870600503:web:a1f43b35fce9975a8ad8b2"
+});
 
-// Initialize Firebase in the service worker
-firebase.initializeApp(firebaseConfig);
+// Retrieve firebase messaging
 const messaging = firebase.messaging();
 
+// Handle background messages
 messaging.onBackgroundMessage((payload) => {
-  console.log('Received background message:', payload);
+  console.log('Received background message', payload);
 
-  // Send the message to the main page via postMessage
-  self.clients.matchAll().then(clients => {
-    clients.forEach(client => {
-      client.postMessage({
-        type: 'background-message',
-        message: payload.notification.body || 'No message body',
-      });
-    });
-  });
-
-  const notificationTitle = payload.notification?.title || 'Background Notification';
+  // Customize notification here
+  const notificationTitle = payload.notification.title;
   const notificationOptions = {
-    body: payload.notification?.body || 'Background message body',
-    icon: '/firebase-logo.png',
+    body: payload.notification.body,
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);

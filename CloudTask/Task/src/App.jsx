@@ -12,11 +12,8 @@ function App() {
   const [topicInput, setTopicInput] = useState('');
   const [messageInput, setMessageInput] = useState('');
   const [storedNotifications, setStoredNotifications] = useState([]);
+  const { token, requestNotificationPermission } = useFirebaseMessaging();
   
-  const { 
-
-    requestNotificationPermission,
-  } = useFirebaseMessaging();
 
 
   useEffect(() => {
@@ -53,10 +50,28 @@ function App() {
   // ... rest of the component remains similar
 
   return (
+    
     <div className="container mx-auto p-4">
       {/* Previous UI components */}
       
       {/* Send Topic Message Section */}
+      <div>
+      <h1>Notification App</h1>
+      {token && <p>Token: {token}</p>}
+      <div>
+        <ul>
+          {storedNotifications.length > 0 ? (
+            storedNotifications.map(notification => (
+              <li key={notification.id}>
+                {notification.message}
+              </li>
+            ))
+          ) : (
+            <p className="text-gray-500">No stored notifications.</p>
+          )}
+        </ul>
+      </div>
+    </div>
       <div className="mb-6">
         <h3 className="font-semibold mb-2">Send Topic Message</h3>
         <div className="flex space-x-2">

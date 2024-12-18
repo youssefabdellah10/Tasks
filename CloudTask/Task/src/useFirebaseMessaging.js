@@ -14,6 +14,7 @@ export const useFirebaseMessaging = () => {
         const currentToken = await getToken(messaging, {
           vapidKey: 'BJ053rLnc9yV-M_M8OBHuC0wj2TE3RLe-Ga1hB_ldKMhUkQIdrlAVHfpev6JJPHPiCowBVuen5lYXuu4tq258ug'  
         });
+        console.log('Token:', currentToken);
 
         if (currentToken) {
           setToken(currentToken);

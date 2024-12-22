@@ -9,13 +9,12 @@ def load_data(filePath):
     targets = data.iloc[:, -1].values.reshape(-1, 1)
     return features, targets
 
+scaler_features = StandardScaler()
+scaler_targets = StandardScaler()
+
 def preprocess_data(features, targets):
 
     X_train, X_test, y_train, y_test = train_test_split(features, targets, test_size=0.25, random_state=42)
-
-    scaler_features = StandardScaler()
-    scaler_targets = StandardScaler()
-
     X_train = scaler_features.fit_transform(X_train)
     X_test = scaler_features.transform(X_test)
     y_train = scaler_targets.fit_transform(y_train)
@@ -64,8 +63,7 @@ class NeuralNetwork:
                 hidden_input = np.dot(x, self.weights_input_to_hidden) + self.bias_hidden
                 hidden_output = self.sigmoid(hidden_input)
 
-                final_input = np.dot(hidden_output, self.weights_hidden_to_output) + self.bias_output
-                y_pred = final_input 
+                y_pred = np.dot(hidden_output, self.weights_hidden_to_output) + self.bias_output 
 
                 # Compute loss
                 loss = np.mean((y - y_pred) ** 2)
@@ -91,8 +89,8 @@ class NeuralNetwork:
     def predict(self, X):
         hidden_input = np.dot(X, self.weights_input_to_hidden) + self.bias_hidden
         hidden_output = self.sigmoid(hidden_input)
-        z_output = np.dot(hidden_output, self.weights_hidden_to_output) + self.bias_output
-        return z_output
+        predict = np.dot(hidden_output, self.weights_hidden_to_output) + self.bias_output
+        return predict
 
     def calculate_error(self, X_test, y_test):
         y_pred = self.predict(X_test)
@@ -108,9 +106,31 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test = preprocess_data(features, targets)
 
     nn = NeuralNetwork()
-    nn.set_network(input_layer_size=4, hidden_layer_size=8,output_layer_size=1, learning_rate=0.001, epochs=1000)
+    nn.set_network(input_layer_size=4, hidden_layer_size=4,output_layer_size=1, learning_rate=0.001, epochs=1000)
 
     nn.train(X_train, y_train)
     
     test_error = nn.calculate_error(X_test, y_test)
     print(f"Test Error: {test_error}")
+
+    
+    print("how many example:")
+    num = int(input())
+    for i in range(num):
+        print("Enter the following features to predict the concrete compressive strength:")
+        print("Enter Cement:")
+        cement = int(input())
+        print("Enter water:")
+        water = int(input())
+        print("Enter superplasticizer:")
+        superplasticizer = float(input())
+        print("Enter age:")
+        age = int(input())
+        examples = np.array([[cement, water, superplasticizer, age]])
+        examples_scaled = scaler_features.transform(examples)
+        predictions_scaled = nn.predict(examples_scaled)
+        predictions = scaler_targets.inverse_transform(predictions_scaled)
+        for i, prediction in enumerate(predictions):
+            print(f"{i+1} Predicted concrete_compressive_strength: {prediction[0]} ")
+
+    

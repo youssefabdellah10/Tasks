@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from sklearn.discriminant_analysis import StandardScaler
+from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
 def load_data(filePath):
@@ -10,10 +10,9 @@ def load_data(filePath):
     return features, targets
 
 def preprocess_data(features, targets):
-    # Split the data into training and testing sets
+
     X_train, X_test, y_train, y_test = train_test_split(features, targets, test_size=0.25, random_state=42)
 
-    # Normalize the data
     scaler_features = StandardScaler()
     scaler_targets = StandardScaler()
 
@@ -47,8 +46,7 @@ class NeuralNetwork:
         self.output_layer_size = output_layer_size
         self.learning_rate = learning_rate
         self.epochs = epochs
-        
-        # Initialize weights and biases
+
         self.weights_input_to_hidden = np.random.randn(self.input_layer_size, self.hidden_layer_size)
         self.weights_hidden_to_output = np.random.randn(self.hidden_layer_size, self.output_layer_size) 
         self.bias_hidden = np.zeros((1, self.hidden_layer_size))
@@ -88,7 +86,7 @@ class NeuralNetwork:
                 self.bias_hidden -= self.learning_rate * d_bias_hidden
                 self.bias_output -= self.learning_rate * d_bias_output
             if (epoch + 1) % 100 == 0:
-                print(f"Epoch {epoch + 1}/{self.epochs}, Loss: {total_loss / len(X_train):.4f}")
+                print(f"Epoch {epoch + 1}/{self.epochs}, Loss: {total_loss/len(X_train)}")
 
     def predict(self, X):
         hidden_input = np.dot(X, self.weights_input_to_hidden) + self.bias_hidden
@@ -101,20 +99,18 @@ class NeuralNetwork:
         return np.mean((y_test - y_pred) ** 2)
 
 
+
+
 if __name__ == '__main__':
-    # Load the data
+
     features, targets = load_data("concrete_data.xlsx")
 
-    # Preprocess the data
     X_train, X_test, y_train, y_test = preprocess_data(features, targets)
 
-    # Initialize and configure the neural network
     nn = NeuralNetwork()
     nn.set_network(input_layer_size=4, hidden_layer_size=8,output_layer_size=1, learning_rate=0.001, epochs=1000)
 
-    # Train the neural network
     nn.train(X_train, y_train)
-
-    # Calculate and print the error on the test set
+    
     test_error = nn.calculate_error(X_test, y_test)
     print(f"Test Error: {test_error}")

@@ -97,8 +97,6 @@ class NeuralNetwork:
         return np.mean((y_test - y_pred) ** 2)
 
 
-
-
 if __name__ == '__main__':
 
     features, targets = load_data("concrete_data.xlsx")
@@ -106,7 +104,7 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test = preprocess_data(features, targets)
 
     nn = NeuralNetwork()
-    nn.set_network(input_layer_size=4, hidden_layer_size=4,output_layer_size=1, learning_rate=0.001, epochs=1000)
+    nn.set_network(input_layer_size=4, hidden_layer_size=8,output_layer_size=1, learning_rate=0.01, epochs=1000)
 
     nn.train(X_train, y_train)
     
@@ -130,7 +128,7 @@ if __name__ == '__main__':
         examples_scaled = scaler_features.transform(examples)
         predictions_scaled = nn.predict(examples_scaled)
         predictions = scaler_targets.inverse_transform(predictions_scaled)
-        for i, prediction in enumerate(predictions):
-            print(f"{i+1} Predicted concrete_compressive_strength: {prediction[0]} ")
+    for i, prediction in enumerate(predictions):
+        print(f"{i+1} Predicted concrete_compressive_strength: {prediction[0]} ")
 
     

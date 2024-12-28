@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Flights</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: #ffffff;
+            color: #333;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 800px;
+        }
+        h1 {
+            text-align: center;
+            color: #6a11cb;
+            margin-bottom: 1.5rem;
+        }
+        .section {
+            margin-bottom: 1.5rem;
+        }
+        .section h2 {
+            font-size: 1.2rem;
+            color: #2575fc;
+            margin-bottom: 0.5rem;
+        }
+        .search-form, .flights-list {
+            padding: 1rem;
+            background: #f9f9f9;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            margin-bottom: 1rem;
+        }
+        .flights-list ul {
+            list-style: none;
+        }
+        .flights-list ul li {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: #e8e8e8;
+            border-radius: 4px;
+        }
+        .flights-list ul li a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+        }
+        .flights-list ul li a:hover {
+            background: #ddd;
+        }
+        input, button {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        input {
+            border: 1px solid #ddd;
+            transition: 0.3s ease;
+        }
+        input:focus {
+            border: 1px solid #6a11cb;
+            box-shadow: 0 0 5px rgba(106, 17, 203, 0.5);
+            outline: none;
+        }
+        button {
+            background: #6a11cb;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+        button:hover {
+            background: #2575fc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Search Flights</h1>
+
+        <div class="section search-form">
+            <h2>Search for Flights</h2>
+            <form id="searchForm">
+                <input type="text" name="from" placeholder="From" required>
+                <input type="text" name="to" placeholder="To" required>
+                <button type="submit">Search</button>
+            </form>
+        </div>
+
+        <div class="section flights-list" id="flights-list" style="display: none;">
+            <h2>Available Flights</h2>
+            <ul id="flights">
+                <!-- Flights will be populated here -->
+            </ul>
+        </div>
+
+        <div class="message" id="message" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', function (e) {
+            e.preventDefault(); // Prevent the form from submitting normally
+
+            const formData = new FormData(this);
+            fetch('/backend/search_flights.php?' + new URLSearchParams(formData).toString())
+                .then(response => response.json())
+                .then(data => {
+                    const flightsList = document.getElementById('flights');
+                    const flightsSection = document.getElementById('flights-list');
+                    const messageDiv = document.getElementById('message');
+
+                    flightsList.innerHTML = '';
+                    if (data.status === 'success') {
+                        data.flights.forEach(flight => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `<a href="flight_info.html?flight_id=${flight.id}">
+                                ${flight.id} - ${flight.name} - ${flight.origin} to ${flight.destination} - ${flight.flight_time} - $${flight.fees}
+                            </a>`;
+                            flightsList.appendChild(li);
+                        });
+                        flightsSection.style.display = 'block';
+                        messageDiv.style.display = 'none';
+                    } else {
+                        messageDiv.textContent = data.message;
+                        messageDiv.style.display = 'block';
+                        flightsSection.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    const messageDiv = document.getElementById('message');
+                    messageDiv.textContent = 'There was an error with the request: ' + error;
+                    messageDiv.style.display = 'block';
+                });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passenger Profile</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: #ffffff;
+            color: #333;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 800px;
+        }
+        h1 {
+            text-align: center;
+            color: #6a11cb;
+            margin-bottom: 1.5rem;
+        }
+        .section {
+            margin-bottom: 1.5rem;
+        }
+        .section h2 {
+            font-size: 1.2rem;
+            color: #2575fc;
+            margin-bottom: 0.5rem;
+        }
+        .profile, .flights-list {
+            padding: 1rem;
+            background: #f9f9f9;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            margin-bottom: 1rem;
+        }
+        .flights-list ul {
+            list-style: none;
+        }
+        .flights-list ul li {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: #e8e8e8;
+            border-radius: 4px;
+        }
+        .flights-list ul li a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+        }
+        .flights-list ul li a:hover {
+            background: #ddd;
+        }
+        input, button {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        input {
+            border: 1px solid #ddd;
+            transition: 0.3s ease;
+        }
+        input:focus {
+            border: 1px solid #6a11cb;
+            box-shadow: 0 0 5px rgba(106, 17, 203, 0.5);
+            outline: none;
+        }
+        button {
+            background: #6a11cb;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+        button:hover {
+            background: #2575fc;
+        }
+        .profile img {
+            max-width: 150px;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Passenger Profile</h1>
+
+        <div class="section profile">
+            <h2>Profile</h2>
+            <img id="profile-photo" src="" alt="Profile Image" class="profile-photo">
+            <p>Name: <span id="profile-name"></span></p>
+            <p>Email: <span id="profile-email"></span></p>
+            <p>Tel: <span id="profile-phone"></span></p>
+            <p><a href="edit_profile.html"><button>Edit Profile</button></a></p>
+        </div>
+
+        <div class="section flights-list">
+            <h2>My Flights</h2>
+            <ul id="flights-list">
+                <!-- Flights will be populated here -->
+            </ul>
+        </div>
+
+        <div class="section">
+            <button onclick="window.location.href='search_flights.html'">Search</button>
+            <button onclick="window.location.href='../backend/submit_message.php'">Send Message</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('/backend/passenger_profile.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.getElementById('profile-photo').src = data.profile.photo;
+                        document.getElementById('profile-name').textContent = data.profile.name;
+                        document.getElementById('profile-email').textContent = data.profile.email;
+                        document.getElementById('profile-phone').textContent = data.profile.phone;
+
+                        const flightsList = document.getElementById('flights-list');
+                        data.flights.forEach(flight => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `<a href="flight_info.html?flight_id=${flight.id}">
+                                ${flight.id} - ${flight.name} - ${flight.origin} to ${flight.destination} - ${flight.flight_time}
+                            </a>`;
+                            flightsList.appendChild(li);
+                        });
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('There was an error with the request: ' + error);
+                });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+-- Create table for users (common fields for both companies and passengers)
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    tel VARCHAR(15) NOT NULL,
+    type ENUM('company', 'passenger') NOT NULL
+);
+
+-- Create table for companies
+CREATE TABLE IF NOT EXISTS companies (
+    company_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    company_name VARCHAR(255) NOT NULL,
+    company_address TEXT,
+    contact_number VARCHAR(15) DEFAULT NULL,
+    bio TEXT,
+    location VARCHAR(255) DEFAULT NULL,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    logo_img VARCHAR(255) DEFAULT NULL,
+    account_balance DECIMAL(10, 2) DEFAULT 0.00,
+    flights JSON DEFAULT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Create table for passengers
+CREATE TABLE IF NOT EXISTS passengers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    tel VARCHAR(15) NOT NULL,
+    photo VARCHAR(255) DEFAULT NULL,
+    passport_img VARCHAR(255) DEFAULT NULL,
+    completed_flights INT DEFAULT 0,
+    pending_flights INT DEFAULT 0,
+    account_balance DECIMAL(10, 2) DEFAULT 10000.00,
+    fees DECIMAL(10, 2) DEFAULT 0.00,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+
+-- Create table for flights
+CREATE TABLE IF NOT EXISTS flights (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    origin VARCHAR(255) NOT NULL,
+    destination VARCHAR(255) NOT NULL,
+    fees DECIMAL(10, 2) NOT NULL,
+    passenger_count INT DEFAULT 0,
+    flight_time DATETIME NOT NULL
+);
+
+-- Create table for company-flight relationships
+CREATE TABLE IF NOT EXISTS flight_company (
+    flight_id INT NOT NULL,
+    company_id INT NOT NULL,
+    PRIMARY KEY (flight_id, company_id),
+    FOREIGN KEY (flight_id) REFERENCES flights(id) ON DELETE CASCADE,
+    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE
+);
+
+-- Create table for passenger-flight relationships
+CREATE TABLE IF NOT EXISTS flight_passenger (
+    flight_id INT NOT NULL,
+    passenger_id INT NOT NULL,
+    booking_date DATETIME NOT NULL,
+    PRIMARY KEY (flight_id, passenger_id),
+    FOREIGN KEY (flight_id) REFERENCES flights(id) ON DELETE CASCADE,
+    FOREIGN KEY (passenger_id) REFERENCES passengers(id) ON DELETE CASCADE
+);
+
+-- Create table for messages
+CREATE TABLE IF NOT EXISTS message (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    company_id INT NOT NULL,
+    message_text VARCHAR(1000) NOT NULL,
+    FOREIGN KEY (company_id) REFERENCES companies(company_id) ON DELETE CASCADE
+);
+
+-- Create table for messages
+CREATE TABLE IF NOT EXISTS Messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,  -- Unique identifier for each message
+    company_id INT NOT NULL,            -- Foreign key to link to the Company table
+    passenger_id INT NOT NULL,          -- Foreign key to link to the Passenger table
+    message TEXT NOT NULL,              -- Message content
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp for when the message was created
+    FOREIGN KEY (company_id) REFERENCES Companies(company_id) ON DELETE CASCADE, -- Define the foreign key relationship with Companies
+    FOREIGN KEY (passenger_id) REFERENCES Passengers(id) ON DELETE CASCADE -- Define the foreign key relationship with Passengers
+);

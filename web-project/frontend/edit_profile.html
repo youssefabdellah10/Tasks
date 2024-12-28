@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #ffffff;
+            color: #333;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .container h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #6a11cb;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="file"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            background: #6a11cb;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        button:hover {
+            background: #2575fc;
+        }
+
+        .profile-photo {
+            max-width: 150px;
+            margin-top: 10px;
+        }
+
+        .message {
+            padding: 1rem;
+            background: #e8e8e8;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Edit Profile</h1>
+
+        <div class="message" id="message" style="display: none;"></div>
+
+        <form id="editProfileForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Telephone</label>
+                <input type="tel" id="phone" name="phone" required>
+            </div>
+            <div class="form-group">
+                <label for="photo">Profile Photo</label>
+                <input type="file" id="photo" name="photo">
+                <img id="profile-photo" class="profile-photo" src="" alt="Profile Image" style="display: none;">
+            </div>
+            <button type="submit">Update Profile</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('/backend/edit_profile.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const profile = data.profile;
+                        document.getElementById('name').value = profile.name;
+                        document.getElementById('email').value = profile.email;
+                        document.getElementById('phone').value = profile.phone;
+                        if (profile.photo) {
+                            const profilePhoto = document.getElementById('profile-photo');
+                            profilePhoto.src = profile.photo;
+                            profilePhoto.style.display = 'block';
+                        }
+                    } else {
+                        const messageDiv = document.getElementById('message');
+                        messageDiv.textContent = data.message;
+                        messageDiv.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    const messageDiv = document.getElementById('message');
+                    messageDiv.textContent = 'There was an error with the request: ' + error;
+                    messageDiv.style.display = 'block';
+                });
+        });
+
+        document.getElementById('editProfileForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            fetch('/backend/edit_profile.php', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                const messageDiv = document.getElementById('message');
+                messageDiv.textContent = data.message;
+                messageDiv.style.display = 'block';
+            })
+            .catch(error => {
+                const messageDiv = document.getElementById('message');
+                messageDiv.textContent = 'There was an error with the request: ' + error;
+                messageDiv.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Info</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #ffffff;
+            color: #333;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .container h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #6a11cb;
+        }
+
+        .section {
+            margin-bottom: 1.5rem;
+        }
+
+        .section h2 {
+            font-size: 1.2rem;
+            color: #2575fc;
+            margin-bottom: 0.5rem;
+        }
+
+        .flight-info, .payment-options {
+            padding: 1rem;
+            background: #f9f9f9;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            margin-bottom: 1rem;
+        }
+
+        .flight-info p, .payment-options p {
+            margin-bottom: 0.5rem;
+        }
+
+        .payment-options label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .payment-options input[type="radio"] {
+            margin-right: 0.5rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            background: #6a11cb;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+
+        button:hover {
+            background: #2575fc;
+            transform: translateY(-3px);
+        }
+
+        .message {
+            padding: 1rem;
+            background: #e8e8e8;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Flight Info</h1>
+
+        <div class="section flight-info">
+            <h2>Flight Details</h2>
+            <div id="flight-details">
+                <!-- Flight details will be populated here -->
+            </div>
+        </div>
+
+        <div class="section payment-options" id="payment-options" style="display: none;">
+            <h2>Take it? Option</h2>
+            <form id="booking-form">
+                <input type="hidden" name="flight_id" id="flight_id">
+                <label>
+                    <input type="radio" name="payment_type" value="account" required>
+                    Pay from account (<span id="flight-fees"></span>)
+                </label>
+                <label>
+                    <input type="radio" name="payment_type" value="cash" required>
+                    Cash (dealing with company)
+                </label>
+                <button type="submit">Proceed</button>
+            </form>
+        </div>
+
+        <div class="message" id="message" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const flightId = urlParams.get('flight_id');
+
+            if (flightId) {
+                fetch(`/backend/flight_info.php?flight_id=${flightId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            const flightInfo = data.flight_info;
+                            document.getElementById('flight-details').innerHTML = `
+                                <p>ID: ${flightInfo.id}</p>
+                                <p>Name: ${flightInfo.name}</p>
+                                <p>Origin: ${flightInfo.origin}</p>
+                                <p>Destination: ${flightInfo.destination}</p>
+                                <p>Fees: $${flightInfo.fees}</p>
+                                <p>Passenger Count: ${flightInfo.passenger_count}</p>
+                                <p>Flight Time: ${flightInfo.flight_time}</p>
+                            `;
+                            document.getElementById('flight_id').value = flightInfo.id;
+                            document.getElementById('flight-fees').textContent = `$${flightInfo.fees}`;
+                            document.getElementById('payment-options').style.display = 'block';
+                        } else {
+                            document.getElementById('message').textContent = data.message;
+                            document.getElementById('message').style.display = 'block';
+                        }
+                    })
+                    .catch(error => {
+                        document.getElementById('message').textContent = 'There was an error with the request: ' + error;
+                        document.getElementById('message').style.display = 'block';
+                    });
+            } else {
+                document.getElementById('message').textContent = 'No flight ID provided.';
+                document.getElementById('message').style.display = 'block';
+            }
+        });
+
+        document.getElementById('booking-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            fetch('/backend/flight_info.php', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                const messageDiv = document.getElementById('message');
+                messageDiv.textContent = data.message;
+                messageDiv.style.display = 'block';
+
+                if (data.status === 'success') {
+                    document.getElementById('flight-details').innerHTML += `
+                        <p>Updated Passenger Count: ${data.updated_passenger_count}</p>
+                    `;
+                }
+            })
+            .catch(error => {
+                const messageDiv = document.getElementById('message');
+                messageDiv.textContent = 'There was an error with the request: ' + error;
+                messageDiv.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>

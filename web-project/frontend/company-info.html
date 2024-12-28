@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Company Registration</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Arial", sans-serif;
+        background: linear-gradient(to right, #6a11cb, #2575fc);
+        color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .form-container {
+        background: #ffffff;
+        color: #333;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+      }
+
+      h2 {
+        color: #6a11cb;
+        font-size: 1.6rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group {
+        margin-bottom: 0.8rem;
+        text-align: left;
+      }
+
+      label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: bold;
+        margin-bottom: 0.3rem;
+      }
+
+      input,
+      textarea,
+      select {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        transition: 0.3s ease;
+      }
+
+      input:focus,
+      textarea:focus,
+      select:focus {
+        border: 1px solid #6a11cb;
+        box-shadow: 0 0 4px rgba(106, 17, 203, 0.4);
+        outline: none;
+      }
+
+      textarea {
+        resize: none;
+      }
+
+      button {
+        width: 100%;
+        padding: 0.5rem;
+        font-size: 0.85rem;
+        font-weight: bold;
+        color: #fff;
+        background: #6a11cb;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: 0.3s ease;
+      }
+
+      button:hover {
+        background: #2575fc;
+      }
+
+      .form-footer {
+        margin-top: 1rem;
+        font-size: 0.75rem;
+      }
+
+      .form-footer a {
+        color: #6a11cb;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      .form-footer a:hover {
+        text-decoration: underline;
+      }
+
+      @media (max-width: 768px) {
+        .form-container {
+          padding: 0.8rem;
+          width: 90%;
+        }
+
+        button {
+          padding: 0.4rem;
+          font-size: 0.8rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="form-container">
+      <h2>Register as a Company</h2>
+      <form id="companyForm" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="company_name">Company Name</label>
+          <input type="text" id="company_name" name="company_name" required />
+        </div>
+
+        <div class="form-group">
+          <label for="bio">Bio</label>
+          <textarea id="bio" name="bio" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="address">Company Address</label>
+          <textarea id="address" name="address" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="location">Location (optional)</label>
+          <input type="text" id="location" name="location" />
+        </div>
+
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required />
+        </div>
+
+        <div class="form-group">
+          <label for="logo_img">Logo Image</label>
+          <input type="file" id="logo_img" name="logo_img" required />
+        </div>
+
+        <div class="form-group">
+          <label for="account_balance">Account Balance</label>
+          <input
+            type="number"
+            id="account_balance"
+            name="account_balance"
+            value="0"
+            step="0.01"
+            required
+          />
+        </div>
+
+        <button type="submit">Register</button>
+      </form>
+    </div>
+
+    <script>
+     document
+  .getElementById("companyForm")
+  .addEventListener("submit", function (e) {
+    e.preventDefault(); // Prevent the form from submitting normally
+
+    // Create a FormData object to send the form data
+    var formData = new FormData(this);
+    fetch("/backend/company-info.php", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "success") {
+          alert("Company registered successfully!");
+          window.location.href = "/frontend/login.html"; 
+        } else {
+          alert("Error: " + data.message);
+        }
+      })
+      .catch((error) => {
+        alert("There was an error with the request: " + error);
+      });
+  });
+    </script>
+  </body>
+</html>

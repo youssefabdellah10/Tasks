@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .form-container {
+            background: #ffffff;
+            color: #333;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        h2 {
+            color: #6a11cb;
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
+        }
+        .form-group {
+            margin-bottom: 0.8rem;
+            text-align: left;
+        }
+        label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+        }
+        input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: 0.3s ease;
+        }
+        input:focus {
+            border: 1px solid #6a11cb;
+            box-shadow: 0 0 4px rgba(106, 17, 203, 0.4);
+            outline: none;
+        }
+        button {
+            width: 100%;
+            padding: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #fff;
+            background: #6a11cb;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+        button:hover {
+            background: #2575fc;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="text" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault(); // Prevent the form from submitting normally
+
+            // Create a FormData object to send the form data
+            var formData = new FormData(this);
+            fetch("/backend/login.php", {
+                method: "POST",
+                body: formData,
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.status === "success") {
+                    alert(data.message);
+                    window.location.href = data.redirect; // Redirect based on the response
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch((error) => {
+                alert("There was an error with the request: " + error);
+            });
+        });
+    </script>
+</body>
+</html>

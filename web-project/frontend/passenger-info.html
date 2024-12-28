@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Booking - Passenger Info</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .form-container {
+            background: #ffffff;
+            color: #333;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #6a11cb;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 0.4rem;
+        }
+
+        input[type="text"],
+        input[type="file"] {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="file"]:focus {
+            border: 1px solid #6a11cb;
+            box-shadow: 0 0 5px rgba(106, 17, 203, 0.5);
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.6rem;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #fff;
+            background: #6a11cb;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        button:hover {
+            background: #2575fc;
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 1.2rem;
+                width: 90%;
+            }
+
+            button {
+                padding: 0.5rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Passenger Information</h2>
+        <form id="passengerForm" enctype="multipart/form-data">
+            <input type="hidden" name="type" value="passenger">
+            
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="photo">Upload Photo</label>
+                <input type="file" id="photo" name="photo" accept="image/*" required>
+            </div>
+        
+            <div class="form-group">
+                <label for="passport_img">Upload Passport Image</label>
+                <input type="file" id="passport_img" name="passport_img" accept="image/*" required>
+            </div>
+        
+            <button type="submit">Submit</button>
+        </form>
+        
+    </div>
+
+    <script>
+        document.getElementById('passengerForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            
+            let formData = new FormData(this);
+
+            fetch('/backend/passenger-info.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())  // Use text() to get raw response first
+            .then(data => {
+                console.log('Response:', data);  // Log the raw response
+                try {
+                    const jsonData = JSON.parse(data);  // Try parsing the raw response to JSON
+                    if (jsonData.status === 'success') {
+                        alert("Passenger registered successfully!");
+                        window.location.href = '/frontend/login.html';
+                    } else {
+                        alert(jsonData.message);
+                    }
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    alert('Failed to parse response. Check server logs for errors.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>

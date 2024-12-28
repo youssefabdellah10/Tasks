@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Booking - Register</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="register-container">
+        <h2>Register</h2>
+        <form id="registerForm" method="POST">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <label for="tel">Phone Number:</label>
+            <input type="text" id="tel" name="tel" required>
+
+            <label for="type">User Type:</label>
+            <select id="type" name="type" required>
+                <option value="company">Company</option>
+                <option value="passenger">Passenger</option>
+            </select>
+
+            <button type="submit">Register</button>
+        </form>
+    </div>
+
+    <script>
+       document.getElementById('registerForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // Prevent the form from submitting the default way
+    
+    let formData = new FormData(this);
+
+    fetch('/backend/register.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'error') {
+            alert(data.message);
+        } else if (data.status === 'success') {
+
+            alert(data.message);
+            
+            // Redirect based on user type
+            if (data.type === 'company') {
+                window.location.href = '/frontend/company-info.html'; 
+            } else if (data.type === 'passenger') {
+                window.location.href = '/frontend/passenger-info.html'; 
+            }
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+
+
+    </script>
+</body>
+</html>    

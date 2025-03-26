@@ -1,0 +1,64 @@
+1 
+00:1A:2B:3C:4D:5E 
+00-1A-2B-3C-4D-5E 
+001A2B3C4D5E 
+00:1A:2B:3C:4D:5G 
+end
+2 
+bb 
+bab 
+bababbb 
+abbabbb 
+end
+3 
+11/3/2024 
+1st-03-2024 
+1 10 123 
+end
+4 
+192.168.1.1 
+192.168.1.256 
+end
+5 
+x 
+x1y2 
+_hello 
+1x 
+bad name 
+!name 
+end
+6 
+bbb 
+baBb 
+abAb 
+end
+7 
+aabb 
+aabaaaaabaa 
+end
+8 
+The match was a perfect reflection of their hard work and dedication 
+Ants move quickly over dry sand 
+end
+9
+[2023-10-15 14:30:45] [INFO] Application started
+[2023-10-15 14:31:10] [ERROR] Failed to connect to database
+[2023-10-15 14:32:00] [INFO] User logged in
+end
+10
+3x-3y=90
+x^2+3x+2=6.5+y^-1
+3x*-3y/z=90+n
+=9
+end
+11 
+The sky turned orange at sunset today 
+Creativity makes life more interesting 
+end
+12 
+1a8c0z 
+Aa1b6 
+end
+13 
+C:\filename.txt 
+end

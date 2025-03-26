@@ -65,7 +65,6 @@ class NeuralNetwork:
 
                 y_pred = np.dot(hidden_output, self.weights_hidden_to_output) + self.bias_output 
 
-                # Compute loss
                 loss = np.mean((y - y_pred) ** 2)
                 total_loss += loss
 

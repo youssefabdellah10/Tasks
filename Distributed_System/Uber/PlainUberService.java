@@ -207,4 +207,16 @@ public class PlainUberService implements UberService {
         }
         return null;
     }
+    public HashMap<String, Customer> getCustomers() {
+        return (HashMap<String, Customer>) customers;
+    }
+    public HashMap<String, Driver> getDrivers() {
+        return (HashMap<String, Driver>) drivers;
+    }
+    public HashMap<String, ClientHandler> getCustomerHandlers() {
+        return (HashMap<String, ClientHandler>) customerHandlers;
+    }
+    public HashMap<String, ClientHandler> getDriverHandlers() {
+        return (HashMap<String, ClientHandler>) driverHandlers;
+    }
 }

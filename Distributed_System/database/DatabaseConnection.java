@@ -14,9 +14,15 @@ public class DatabaseConnection {
     public static Connection getConnection() {
         if (connection == null) {
             try {
+                // Explicitly load the PostgreSQL driver
+                Class.forName("org.postgresql.Driver");
                 connection = DriverManager.getConnection(URL, USER, PASSWORD);
                 System.out.println("Connected to PostgreSQL database successfully!");
+            } catch (ClassNotFoundException e) {
+                System.err.println("PostgreSQL JDBC Driver not found. Add it to your classpath.");
+                e.printStackTrace();
             } catch (SQLException e) {
+                System.err.println("Failed to connect to the PostgreSQL database. Check your URL, username, and password.");
                 e.printStackTrace();
                 throw new RuntimeException("Failed to connect to the PostgreSQL database");
             }

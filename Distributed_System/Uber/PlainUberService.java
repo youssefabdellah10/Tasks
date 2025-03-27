@@ -6,22 +6,27 @@ import java.util.Map;
 
 import model.*;
 import serverSide.ClientHandler;
+import database.DatabaseConnection;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class PlainUberService implements UberService {
 
     private static PlainUberService instance;
-    
-    private Map<String, Customer> customers = new HashMap<>();
-    private Map<String, Driver> drivers = new HashMap<>();
+    private Connection connection;
     
     private Map<String, ClientHandler> customerHandlers = new HashMap<>();
     private Map<String, ClientHandler> driverHandlers = new HashMap<>();
     private Map<String, String> customerDriverPairs = new HashMap<>();
     
     private PlainUberService() {
+        this.connection = DatabaseConnection.getConnection();
     }
     
-    public static PlainUberService getInstance() {
+    public static synchronized PlainUberService getInstance() {
         if (instance == null) {
             instance = new PlainUberService();
         }
@@ -31,13 +36,13 @@ public class PlainUberService implements UberService {
     public void registerClientHandler(String username, String userType, ClientHandler handler) {
         if (userType.equals("CUSTOMER")) {
             customerHandlers.put(username, handler);
-            if(!customers.containsKey(username)){
-                customers.put(username, new Customer(username, ""));
+            if(getCustomer(username) == null){
+                addCustomer(username, "");
             }
         } else if (userType.equals("DRIVER")) {
             driverHandlers.put(username, handler);
-            if(!drivers.containsKey(username)){
-                drivers.put(username, new Driver(username, ""));
+            if(getDriver(username) == null){
+                addDriver(username, "");
             }
         }
     }
@@ -54,17 +59,29 @@ public class PlainUberService implements UberService {
 
     @Override
     public void addCustomer(String username, String password) {
-        if (!customers.containsKey(username)) {
-            Customer customer = new Customer(username, password);
-            customers.put(username, customer);
+        try {
+            String query = "INSERT INTO Customer (username, password) VALUES (?, ?)";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, username);
+            statement.setString(2, password);
+            statement.executeUpdate();
+            System.out.println("Customer added successfully!");
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
     @Override
     public void addDriver(String username, String password) {
-        if (!drivers.containsKey(username)) {
-            Driver driver = new Driver(username, password);
-            drivers.put(username, driver);
+        try {
+            String query = "INSERT INTO Driver (username, password) VALUES (?, ?)";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, username);
+            statement.setString(2, password);
+            statement.executeUpdate();
+            System.out.println("Driver added successfully!");
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
     
@@ -157,7 +174,7 @@ public class PlainUberService implements UberService {
         boolean hasRequests = false;
         
         for (String customerName : customerHandlers.keySet()) {
-            Customer customer = customers.get(customerName);
+            Customer customer = getCustomer(customerName);
             
             if (customer != null && customer.getCurrentLocation() != null && 
                 !customerDriverPairs.containsKey(customerName)) {
@@ -194,12 +211,34 @@ public class PlainUberService implements UberService {
     
     @Override
     public Customer getCustomer(String username) {
-        return customers.get(username);
+        try {
+            String query = "SELECT * FROM Customer WHERE username = ?";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, username);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return new Customer(resultSet.getString("username"), resultSet.getString("password"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
     public Driver getDriver(String username) {
-        return drivers.get(username);
+        try {
+            String query = "SELECT * FROM Driver WHERE username = ?";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, username);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return new Driver(resultSet.getString("username"), resultSet.getString("password"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
     
     public ClientHandler getCustomerHandler(String username) {
@@ -222,18 +261,6 @@ public class PlainUberService implements UberService {
         }
         return null;
     }
-    public HashMap<String, Customer> getCustomers() {
-        return (HashMap<String, Customer>) customers;
-    }
-    public HashMap<String, Driver> getDrivers() {
-        return (HashMap<String, Driver>) drivers;
-    }
-    public HashMap<String, ClientHandler> getCustomerHandlers() {
-        return (HashMap<String, ClientHandler>) customerHandlers;
-    }
-    public HashMap<String, ClientHandler> getDriverHandlers() {
-        return (HashMap<String, ClientHandler>) driverHandlers;
-    }
     @Override
     public void sendOffer(String driverUsername, String customerUsername, double fares, ClientHandler handler) {
         ClientHandler customerHandler = getCustomerHandler(customerUsername);
@@ -244,4 +271,74 @@ public class PlainUberService implements UberService {
             handler.sendMessage("Customer " + customerUsername + " not found or offline.");
         }
     }
+
+    // Add a new ride request
+    public void addRide(int customerId, String pickupLocation, String destination) {
+        try {
+            String query = "INSERT INTO Ride (customer_id, pickup_location, destination, status) VALUES (?, ?, ?, 'REQUESTED')";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setInt(1, customerId);
+            statement.setString(2, pickupLocation);
+            statement.setString(3, destination);
+            statement.executeUpdate();
+            System.out.println("Ride request added successfully!");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Update ride status
+    public void updateRideStatus(int rideId, String status) {
+        try {
+            String query = "UPDATE Ride SET status = ? WHERE id = ?";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, status);
+            statement.setInt(2, rideId);
+            statement.executeUpdate();
+            System.out.println("Ride status updated to " + status);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Assign a driver to a ride
+    public void assignDriverToRide(int rideId, int driverId) {
+        try {
+            String query = "UPDATE Ride SET driver_id = ?, status = 'ACCEPTED' WHERE id = ?";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setInt(1, driverId);
+            statement.setInt(2, rideId);
+            statement.executeUpdate();
+            System.out.println("Driver assigned to ride successfully!");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    // Check if a customer exists by username
+public boolean customerExist(String username) {
+    try {
+        String query = "SELECT 1 FROM Customer WHERE username = ?";
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setString(1, username);
+        ResultSet resultSet = statement.executeQuery();
+        return resultSet.next(); // Returns true if a record exists
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return false; // Returns false if an exception occurs
+}
+
+// Check if a driver exists by username
+public boolean driverExist(String username) {
+    try {
+        String query = "SELECT 1 FROM Driver WHERE username = ?";
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setString(1, username);
+        ResultSet resultSet = statement.executeQuery();
+        return resultSet.next(); // Returns true if a record exists
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return false; // Returns false if an exception occurs
+}
 }

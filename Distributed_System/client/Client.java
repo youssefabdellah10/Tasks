@@ -69,7 +69,7 @@ public class Client {
                     String password = scanner.nextLine();
                     
                     if (userType.equalsIgnoreCase("CUSTOMER")) {
-                        Customer customer = uberService.getCustomers().get(username);
+                        Customer customer = uberService.getCustomer(username);
                         if(customer != null) {
                             if (customer.getPassword().equals(password)) {
                                 isUserAuthenticated = true;
@@ -83,7 +83,7 @@ public class Client {
                         }
                     }
                     else if (userType.equalsIgnoreCase("DRIVER")) {
-                        Driver driver = uberService.getDrivers().get(username);
+                        Driver driver = uberService.getDriver(username);
                         if(driver != null) {
                             if (driver.getPassword().equals(password)) {
                                 isUserAuthenticated = true;
@@ -108,14 +108,14 @@ public class Client {
                     writer.flush();
                     
                     if (userType.equalsIgnoreCase("CUSTOMER")) {
-                        if(uberService.getCustomers().containsKey(username)) {
+                        if(uberService.driverExist(username)) {
                             System.out.println("Customer already exists");
                             continue;
                         }
                         uberService.addCustomer(username, password);
                         isUserAuthenticated = true;
                     } else if (userType.equalsIgnoreCase("DRIVER")) {
-                        if (uberService.getDrivers().containsKey(username)) {
+                        if (uberService.customerExist(username)) {
                             System.out.println("Driver already exists");
                             continue;
                         }
@@ -145,6 +145,7 @@ public class Client {
         
             System.out.println("===========================\n");
         }
+        scanner.close();
             while (socket.isConnected()) {
                 String messageToSend = scanner.nextLine();
                 writer.write(messageToSend);
@@ -185,7 +186,7 @@ public class Client {
             System.out.println("Are you a driver or customer or Admin? (d/c/a): ");
             String userTypeInput = scn.nextLine().toLowerCase();
             String userType = userTypeInput.startsWith("d") ? "DRIVER" : (userTypeInput.startsWith("a") ? "ADMIN" : "CUSTOMER");
-            
+            scn.close();
             Socket socket = new Socket("localhost", 5056);
             Client client = new Client(socket, userType);
             

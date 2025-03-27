@@ -1,5 +1,7 @@
 package Uber;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import model.*;
@@ -29,8 +31,14 @@ public class PlainUberService implements UberService {
     public void registerClientHandler(String username, String userType, ClientHandler handler) {
         if (userType.equals("CUSTOMER")) {
             customerHandlers.put(username, handler);
+            if(!customers.containsKey(username)){
+                customers.put(username, new Customer(username, ""));
+            }
         } else if (userType.equals("DRIVER")) {
             driverHandlers.put(username, handler);
+            if(!drivers.containsKey(username)){
+                drivers.put(username, new Driver(username, ""));
+            }
         }
     }
     
@@ -60,50 +68,26 @@ public class PlainUberService implements UberService {
         }
     }
     
-    @Override
-    public boolean authenticateUser(String username, String password) {
-        Customer customer = customers.get(username);
-        if (customer != null && customer.getPassword().equals(password)) {
-            return true;
-        }
-        
-        Driver driver = drivers.get(username);
-        if (driver != null && driver.getPassword().equals(password)) {
-            return true;
-        }
-        
-        return false;
-    }
 
     @Override
     public void requestRide(String username, String location, String destination, ClientHandler handler) {
         Customer customer = getCustomer(username);
-        
-        if (customer == null) {
-            customer = new Customer(username, "");
-            addCustomer(username, "");
-        }
         customer.setCurrentLocation(location);
         customer.setDestination(destination);
         
-        int availableDriversCount = 0;
+        List<String> drivers = new ArrayList<String>();
         
         for (Map.Entry<String, ClientHandler> entry : driverHandlers.entrySet()) {
-            String driverName = entry.getKey();
-            ClientHandler driverHandler = entry.getValue();
-            Driver driver = getDriver(driverName);
-            if (isPairedDriver(driverName)) {
+            if (isPairedDriver(entry.getKey())) {
                 continue;
             }
-            driverHandler.sendMessage("RIDE REQUEST: Customer " + username + 
-                                   " needs pickup at " + location + 
-                                   " and destination is " + destination);
-            availableDriversCount++;
+            entry.getValue().sendMessage("Ride request from " + username + " at " + location+ " to " + destination);
+            drivers.add(entry.getKey());
         }
-        if (availableDriversCount > 0) {
-            handler.sendMessage("Your ride request has been sent to " + availableDriversCount + 
+        if (drivers.size() > 0) {
+            handler.sendMessage("Your ride request has been sent to " + drivers.size() + 
                              " available drivers.");
-            handler.sendMessage("Please wait for a driver to accept your request. Once accepted, you can chat directly.");
+            handler.sendMessage("Please wait for a driver to accept your request.");
         } else {
             handler.sendMessage("No drivers are currently available. Please try again later.");
         }
@@ -114,27 +98,58 @@ public class PlainUberService implements UberService {
     }
 
     @Override
+    public void acceptOffer(String driverUsername, String customerUsername ,ClientHandler customerHandler) {
+        Driver driver = getDriver(driverUsername);
+        Customer customer = getCustomer(customerUsername);
+        if (driver == null || customer == null) {
+            customerHandler.sendMessage("Customer or driver not found.");
+            return;
+        }
+        driver.setAvaialable(false);
+        customer.setHasAvtiveRide(true);
+        customerDriverPairs.put(customerUsername, driverUsername);
+        ClientHandler driverHandler = driverHandlers.get(driverUsername);
+        if(driverHandler != null){
+            notifyRideAccepted(customerUsername, driverUsername, customerHandler, driverHandler);
+        }else{
+            customerHandler.sendMessage("Driver " + driverUsername + " not found or offline.");
+        }
+    }
+
+    @Override
+    public void declineOffer(String driverUsername, String customerUsername, ClientHandler customerHandler) {
+        ClientHandler driverHandler = getDriverHandler(driverUsername);
+        
+        if (driverHandler != null) {
+            driverHandler.sendMessage("Customer " + customerUsername + " has declined your offer.");
+            customerHandler.sendMessage("You have declined the offer from driver " + driverUsername);
+        }
+    }
+
+    @Override
     public void acceptRide(String driverUsername, String customerUsername, ClientHandler driverHandler) {
+        Customer customer = getCustomer(customerUsername);
+        if (customer == null || customer.getCurrentLocation() == null) {
+            driverHandler.sendMessage("Customer " + customerUsername + " is not requesting a ride.");
+            return;
+        }
+        
+        if (customerDriverPairs.containsKey(customerUsername)) {
+            driverHandler.sendMessage("Customer " + customerUsername + " already has an assigned driver.");
+            return;
+        }
+        
         ClientHandler customerHandler = getCustomerHandler(customerUsername);
         
-        if (customerHandler != null) {
-            customerDriverPairs.put(customerUsername, driverUsername);
-            
-            customerHandler.sendMessage("Driver " + driverUsername + " has accepted your ride request!");
-            customerHandler.sendMessage("--- PRIVATE CHAT STARTED: You can now message your driver directly ---");
-            
-            driverHandler.sendMessage("You have accepted " + customerUsername + "'s ride request.");
-            driverHandler.sendMessage("--- PRIVATE CHAT STARTED: You can now message your customer directly ---");
-            
-            Driver driver = getDriver(driverUsername);
-            if (driver == null) {
-                driver = new Driver(driverUsername, "");
-                addDriver(driverUsername, "");
-            }
-            driver.setAvaialable(false);
-        } else {
-            driverHandler.sendMessage("Customer " + customerUsername + " not found or offline.");
+        if (customerHandler == null) {
+            driverHandler.sendMessage("Customer " + customerUsername + " appears to be offline.");
+            return;
         }
+        driverHandler.sendMessage("Please enter the fare for this ride using: /offer " + customerUsername + " [amount]");
+    }
+
+    public void processOfferCommand(String driverUsername, String customerUsername, double fare, ClientHandler driverHandler) {
+        sendOffer(driverUsername, customerUsername, fare, driverHandler);
     }
 
     @Override
@@ -218,5 +233,15 @@ public class PlainUberService implements UberService {
     }
     public HashMap<String, ClientHandler> getDriverHandlers() {
         return (HashMap<String, ClientHandler>) driverHandlers;
+    }
+    @Override
+    public void sendOffer(String driverUsername, String customerUsername, double fares, ClientHandler handler) {
+        ClientHandler customerHandler = getCustomerHandler(customerUsername);
+        if (customerHandler != null) {
+            customerHandler.sendMessage("Driver " + driverUsername + " has offered a fare of " + fares);
+            handler.sendMessage("You have offered a fare of " + fares + " to " + customerUsername);
+        } else {
+            handler.sendMessage("Customer " + customerUsername + " not found or offline.");
+        }
     }
 }

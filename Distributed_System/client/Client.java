@@ -40,7 +40,24 @@ public class Client {
             String username = "";
             Scanner scanner = new Scanner(System.in);
             
+            
             while (!isUserAuthenticated) {
+                boolean Is_admin = false;
+                if (userType.equalsIgnoreCase("ADMIN")) {
+                    Is_admin = true;
+                    System.out.println("Welcome to admin login page ");
+                    System.out.println("Enter your username: ");
+                    username = scanner.nextLine();
+                    System.out.println("Enter your password: ");
+                    String password = scanner.nextLine();
+                    if (username.equals("admin") && password.equals("123")) {
+                        isUserAuthenticated = true;
+                    } else {
+                        System.out.println("Invalid username or password");
+                        continue;
+                    }
+                }
+                if(!Is_admin){
                 System.out.println("Tab 1 for login, Tab 2 for register");
                 String choice = scanner.nextLine();
                 
@@ -79,6 +96,7 @@ public class Client {
                             continue;
                         }
                     }
+                    
                 }
                 else if(choice.equals("2")) {
                     System.out.println("Welcome to registration page ");
@@ -124,8 +142,9 @@ public class Client {
                 System.out.println("/offer [customer] [fare] - Send a fare offer to a customer");
                 System.out.println("/help - Show this help message");
             }
+        
             System.out.println("===========================\n");
-            
+        }
             while (socket.isConnected()) {
                 String messageToSend = scanner.nextLine();
                 writer.write(messageToSend);
@@ -163,9 +182,9 @@ public class Client {
         try {
             Scanner scn = new Scanner(System.in);
             
-            System.out.println("Are you a driver or customer? (d/c): ");
+            System.out.println("Are you a driver or customer or Admin? (d/c/a): ");
             String userTypeInput = scn.nextLine().toLowerCase();
-            String userType = userTypeInput.startsWith("d") ? "DRIVER" : "CUSTOMER";
+            String userType = userTypeInput.startsWith("d") ? "DRIVER" : (userTypeInput.startsWith("a") ? "ADMIN" : "CUSTOMER");
             
             Socket socket = new Socket("localhost", 5056);
             Client client = new Client(socket, userType);

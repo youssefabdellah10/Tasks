@@ -2,6 +2,7 @@ package Uber;
 
 import model.Customer;
 import model.Driver;
+import model.RideStatus;
 import serverSide.ClientHandler;
 
 public interface UberService {
@@ -15,7 +16,7 @@ public interface UberService {
     void listAvailableRequests(String driverUsername, ClientHandler handler);
     void acceptRide(String driverUsername, String customerUsername, ClientHandler handler);
     void declineOffer(String driverUsername, String customerUsername, ClientHandler handler);
-    
+    void updateRideStatus(String driverUsername, String customerUsername, RideStatus status, ClientHandler handler);
     Customer getCustomer(String username);
     Driver getDriver(String username);
     

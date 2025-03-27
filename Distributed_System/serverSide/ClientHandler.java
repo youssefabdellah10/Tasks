@@ -1,6 +1,8 @@
 package serverSide;
 
 import Uber.*;
+import model.RideStatus;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -144,22 +146,71 @@ public class ClientHandler implements Runnable {
                     sendMessage("This command is only available for drivers.");
                 }
                 break;
-                
+
                 case "/help":
-                if (userType.equals("CUSTOMER")) {
-                    sendMessage("Available commands:\n" +
-                        "/request [pickup location] to [destination] - Request a ride\n" +
-                        "/accept [driver] - Accept a ride offer from a driver\n" +
-                        "/decline [driver] - Decline a ride offer from a driver\n" +
-                        "/help - Show this help message");
-                } else {
-                    sendMessage("Available commands:\n" +
-                        "/available - List all available ride requests\n" +
-                        "/accept [customer] - Begin the process of accepting a customer's ride\n" +
-                        "/offer [customer] [fare] - Send a fare offer to a customer\n" +
-                        "/help - Show this help message");
-                }
-                break;
+                    if (userType.equals("CUSTOMER")) {
+                        sendMessage("Available commands:\n" +
+                            "/request [pickup location] to [destination] - Request a ride\n" +
+                            "/accept [driver] - Accept a ride offer from a driver\n" +
+                            "/decline [driver] - Decline a ride offer from a driver\n" +
+                            "/help - Show this help message");
+                    } else {
+                        sendMessage("Available commands:\n" +
+                            "/available - List all available ride requests\n" +
+                            "/accept [customer] - Begin the process of accepting a customer's ride\n" +
+                            "/offer [customer] [fare] - Send a fare offer to a customer\n" +
+                            "/status [ONWAY|ARRIVED|STARTED|COMPLETED|CANCELED] - Update ride status\n" +
+                            "/help - Show this help message");
+                    }
+                    break;
+                case "/status":
+                        if (userType.equals("DRIVER")) {
+                            if (parts.length < 2) {
+                                sendMessage("Usage: /status [STATUS_TYPE]");
+                                sendMessage("Available statuses: ONWAY, ARRIVED, STARTED, COMPLETED, CANCELED");
+                                return;
+                            }
+                            
+                            String statusType = parts[1].toUpperCase();
+                            
+                            String pairedCustomer = uberService.getPairedCustomerForDriver(username);
+                            
+                            if (pairedCustomer == null) {
+                                sendMessage("You don't have an active ride.");
+                                return;
+                            }
+                            
+                            RideStatus status;
+                            try {
+                                switch (statusType) {
+                                    case "ONWAY":
+                                        status = RideStatus.ON_THE_WAY;
+                                        break;
+                                    case "ARRIVED":
+                                        status = RideStatus.ARRIVED;
+                                        break;
+                                    case "STARTED":
+                                        status = RideStatus.STARTED;
+                                        break;
+                                    case "COMPLETED":
+                                        status = RideStatus.COMPLETED;
+                                        break;
+                                    case "CANCELED":
+                                        status = RideStatus.CANCELED;
+                                        break;
+                                    default:
+                                        sendMessage("Invalid status. Use ONWAY, ARRIVED, STARTED, COMPLETED, or CANCELED.");
+                                        return;
+                                }
+                                
+                                uberService.updateRideStatus(username, pairedCustomer, status, this);
+                            } catch (Exception e) {
+                                sendMessage("Error updating ride status: " + e.getMessage());
+                            }
+                        } else {
+                            sendMessage("Only drivers can update ride status.");
+                        }
+                        break;
                 
             default:
                 sendMessage("Unknown command. Type /help for available commands.");

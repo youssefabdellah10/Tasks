@@ -1,0 +1,29 @@
+CREATE TABLE Admin (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE Customer (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE Driver (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    is_available BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE Ride (
+    id SERIAL PRIMARY KEY,
+    customer_id INT NOT NULL REFERENCES Customer(id) ON DELETE CASCADE,
+    driver_id INT DEFAULT NULL REFERENCES Driver(id) ON DELETE SET NULL,
+    pickup_location TEXT NOT NULL,
+    destination TEXT NOT NULL,
+    fare DECIMAL(10, 2) DEFAULT 0.00 NOT NULL,
+    status VARCHAR(20) DEFAULT 'REQUESTED' 
+        CHECK (status IN ('REQUESTED', 'ACCEPTED', 'COMPLETED', 'CANCELLED'))
+);

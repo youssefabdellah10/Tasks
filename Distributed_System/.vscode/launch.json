@@ -6,6 +6,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Server",
+            "request": "launch",
+            "mainClass": "serverSide.Server",
+            "projectName": "Distributed_System_694ed0dc"
+        },
+        {
+            "type": "java",
+            "name": "Client",
+            "request": "launch",
+            "mainClass": "client.Client",
+            "projectName": "Distributed_System_694ed0dc"
+        },
+        {
+            "type": "java",
             "name": "Current File",
             "request": "launch",
             "mainClass": "${file}"

@@ -204,4 +204,8 @@ public class Database {
             }
         }
     }
+
+    public Map<String, String> getAllCustomerDriverPairs() {
+        return customerDriverPairs;
+    }
 }

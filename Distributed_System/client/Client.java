@@ -138,6 +138,7 @@ public class Client {
             System.out.println("Commands:");
             System.out.println("/request [pickup location] to [destination] - Request a ride");
             System.out.println("/accept [driver] - Accept a ride offer from a driver");
+            System.out.println("/cancel - Cancel your current ride request");
             System.out.println("/decline [driver] - Decline a ride offer from a driver");
             System.out.println("/disconnect - Disconnect from the server");
             System.out.println("/help - Show this help message");
@@ -150,8 +151,13 @@ public class Client {
             System.out.println("/disconnect - Disconnect from the server");
             System.out.println("/help - Show this help message");
         } else {
-            System.out.println("Admin commands available on server side.");
+            System.out.println("Admin Commands:");
+            System.out.println("/status - View system status summary");
+            System.out.println("/rides - View all active rides");
+            System.out.println("/customers - View all registered customers");
+            System.out.println("/drivers - View all registered drivers");
             System.out.println("/disconnect - Disconnect from the server");
+            System.out.println("/help - Show this help message");
         }
         
         System.out.println("===========================\n");

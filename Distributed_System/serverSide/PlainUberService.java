@@ -69,6 +69,26 @@ public class PlainUberService {
             handler.sendMessage("No drivers are currently available. Please try again later.");
         }
     }
+
+    public void cancelRideRequest(String username, ClientHandler handler){
+        Customer customer = database.getCustomer(username);
+        if(customer == null){
+            handler.sendMessage("Customer not found.");
+            return;
+        }
+        String location = customer.getCurrentLocation();
+        customer.setCurrentLocation(null);
+        customer.setDestination(null);
+        handler.sendMessage("Your ride request has been canceled.");
+
+        for(Map.Entry<String, ClientHandler> entry : database.getAllDriverHandlers().entrySet()) {
+            String driverName = entry.getKey();
+            if(database.isPairedDriver(driverName)) {
+                continue;
+            }
+            entry.getValue().sendMessage("Customer " + username + " has canceled their ride request at " + location);
+        }
+    }
     
     public void acceptOffer(String driverUsername, String customerUsername, ClientHandler customerHandler) {
         Driver driver = database.getDriver(driverUsername);
@@ -225,6 +245,7 @@ public class PlainUberService {
             handler.sendMessage("Available commands:\n" +
                 "/request [pickup location] to [destination] - Request a ride\n" +
                 "/accept [driver] - Accept a ride offer from a driver\n" +
+                "/cancel - Cancel your current ride request\n" +
                 "/decline [driver] - Decline a ride offer from a driver\n" +
                 "/disconnect - Disconnect from the server (not available during active rides)\n" +
                 "/help - Show this help message");
@@ -236,7 +257,16 @@ public class PlainUberService {
                 "/status [ONWAY|ARRIVED|STARTED|COMPLETED|CANCELED] - Update ride status\n" +
                 "/disconnect - Disconnect from the server (not available during active rides)\n" +
                 "/help - Show this help message");
+        }else if("ADMIN".equals(userType)){
+            handler.sendMessage("Available commands:\n" +
+            "/status - View system status summary\n" +
+            "/rides - View all active rides\n" +
+            "/customers - View all registered customers\n" +
+            "/drivers - View all registered drivers\n" +
+            "/disconnect - Disconnect from the server\n" +
+            "/help - Show this help message");
         }
+    
     }
     
     public void notifyRideAccepted(String customerName, String driverName, 
@@ -269,5 +299,91 @@ public class PlainUberService {
     
     public String getDriverForCustomer(String customerUsername) {
         return database.getDriverForCustomer(customerUsername);
+    }
+
+    private boolean isAdmin(ClientHandler handler) {
+        return handler.getUserType() != null && handler.getUserType().equalsIgnoreCase("ADMIN");
+    }
+
+
+    public void getAdminSystemStatus(ClientHandler handler){
+        if(!isAdmin(handler)){
+            handler.sendMessage("You are not an admin. Access denied.");
+            return;
+        }
+
+        int totalCustomers = database.getAllCustomers().size();
+        int totalDrivers = database.getAllDrivers().size();
+
+        int activeRides = 0;
+        for(Map.Entry<String,String>entry: database.getAllCustomerDriverPairs().entrySet()){
+            if(entry.getValue() != null){
+                activeRides++;
+            }
+        }
+
+        StringBuilder status = new StringBuilder();
+        status.append("System Status Summary:\n")
+              .append("Total Customers: ").append(totalCustomers).append("\n")
+              .append("Total Drivers: ").append(totalDrivers).append("\n")
+              .append("Active Rides: ").append(activeRides).append("\n");
+        handler.sendMessage(status.toString());
+    }
+
+    public void getAdminRideDetails(ClientHandler handler){
+        if(!isAdmin(handler)){
+            handler.sendMessage("You are not an admin. Access denied.");
+            return;
+        }
+
+        StringBuilder rideDetails = new StringBuilder();
+        rideDetails.append("Active Rides:\n");
+        boolean hasActiveRides = false;
+        for(Map.Entry<String,String> entry: database.getAllCustomerDriverPairs().entrySet()){
+            String customerName = entry.getKey();
+            String driverName = entry.getValue();
+            if(driverName !=null){
+                Customer customer = database.getCustomer(customerName);
+                Driver driver = database.getDriver(driverName);
+                RideStatus status = database.getRideStatus(driverName);
+                rideDetails.append("Customer: ").append(customer.getUsername()).append(", Driver: ").append(driver.getUsername())
+                          .append(", Status: ").append(status)
+                          .append(", From:").append(customer.getCurrentLocation())
+                          .append(" To: ").append(customer.getDestination()).append("\n");
+                hasActiveRides = true;
+            }
+        }
+        if(!hasActiveRides){
+            rideDetails.append("No active rides at the moment.");
+        }
+        handler.sendMessage(rideDetails.toString());
+    }
+
+    public void getAdminCustomerList(ClientHandler handler){
+        if(!isAdmin(handler)){
+            handler.sendMessage("You are not an admin. Access denied.");
+            return;
+        }
+
+        StringBuilder customerList = new StringBuilder();
+        customerList.append("Registered Customers:\n");
+        for(Map.Entry<String, Customer> entry: database.getAllCustomers().entrySet()){
+            customerList.append(entry.getKey()).append("\n");
+        }
+        handler.sendMessage(customerList.toString());
+    }
+
+    public void getAdminDriverList(ClientHandler handler){
+        if(!isAdmin(handler)){
+            handler.sendMessage("You are not an admin. Access denied.");
+            return;
+        }
+
+        StringBuilder driverList = new StringBuilder();
+        driverList.append("Registered Drivers:\n");
+        for(Map.Entry<String, Driver> entry: database.getAllDrivers().entrySet()){
+            driverList.append(entry.getKey()).append("\n");
+        }
+        handler.sendMessage(driverList.toString());
     }
 }

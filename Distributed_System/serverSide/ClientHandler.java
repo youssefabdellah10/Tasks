@@ -116,15 +116,67 @@ public class ClientHandler implements Runnable {
                 break;
 
             case "/status":
-                handleStatusCommand(parts);
+                if(userType.equals("ADMIN")){
+                    uberService.getAdminSystemStatus(this);
+                }else if(userType.equals("DRIVER")){
+                    handleStatusCommand(parts);
+                }else{
+                    sendMessage("This command is only available for drivers.");
+                }
                 break;
             case "/disconnect":
                 handleDisconnectCommand();
                 break;
-                
+            case "/cancel":
+                if(userType.equals("CUSTOMER")){
+                    handleCancelRideCommand();
+                }
+                else{
+                    sendMessage("This command is only available for customers.");
+                }
+                break;
+            case "/rides":
+                if(userType.equals("ADMIN")){
+                    uberService.getAdminRideDetails(this);
+                }else{
+                    sendMessage("This command is only available for admins.");
+                }
+                break;
+
+            case "/customers":
+                if(userType.equals("ADMIN")){
+                    uberService.getAdminCustomerList(this);
+                }else{
+                    sendMessage("This command is only available for admins.");
+                }
+                break;
+            case "/drivers":
+                if(userType.equals("ADMIN")){
+                    uberService.getAdminDriverList(this);
+                }else{
+                    sendMessage("This command is only available for admins.");
+                }
+                break;
             default:
                 sendMessage("Unknown command. Type /help for available commands.");
         }
+    }
+
+    private void handleCancelRideCommand(){
+        Customer customer = uberService.getCustomer(username);
+        if(customer == null){
+            sendMessage("Error");
+            return;
+        }
+        if(customer.isHasAvtiveRide()){
+            sendMessage("You can not cancel the ride while you have an active ride.");
+            return;
+        }
+        if(customer.getCurrentLocation() == null || customer.getCurrentLocation().isEmpty()){
+            sendMessage("You can not cancel the ride while you have no active ride.");
+            return;
+        }
+        uberService.cancelRideRequest(username, this);
     }
     
     private void handleLoginCommand(String command) {
@@ -364,5 +416,10 @@ public class ClientHandler implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+
+    public String getUserType() {
+        return this.userType;
     }
 }

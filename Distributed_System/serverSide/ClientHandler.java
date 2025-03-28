@@ -41,7 +41,6 @@ public class ClientHandler implements Runnable {
             uberService.registerClientHandler(username, userType, this);
             
             clients.add(this);
-            broadcast(userType + " " + username + " connected");
         } catch (IOException e) {
             closeEverything(socket, reader, writer);
         }
@@ -54,10 +53,6 @@ public class ClientHandler implements Runnable {
             try {
                 while (socket.isConnected() && (messageFromClient = reader.readLine()) != null) {
                     processMessage(messageFromClient);
-                    if (messageFromClient.equalsIgnoreCase("exit")) {
-                        closeEverything(socket, reader, writer);
-                        break;
-                    }
                 }
             } catch (IOException e) {
                 System.out.println("Client " + username + " disconnected.");
@@ -127,6 +122,36 @@ public class ClientHandler implements Runnable {
             case "/disconnect":
                 handleDisconnectCommand();
                 break;
+                case "/cancel":
+                    if(userType.equals("CUSTOMER")){
+                        handleCancelRideCommand();
+                    }
+                    else{
+                        sendMessage("This command is only available for customers.");
+                    }
+                    break;
+                case "/rides":
+                    if(userType.equals("ADMIN")){
+                        uberService.getAdminRideDetails(this);
+                    }else{
+                        sendMessage("This command is only available for admins.");
+                    }
+                    break;
+
+                case "/customers":
+                    if(userType.equals("ADMIN")){
+                        uberService.getAdminCustomerList(this);
+                    }else{
+                        sendMessage("This command is only available for admins.");
+                    }
+                    break;
+                case "/drivers":
+                    if(userType.equals("ADMIN")){
+                        uberService.getAdminDriverList(this);
+                    }else{
+                        sendMessage("This command is only available for admins.");
+                    }
+                    break;
             case "/rate":
                 handleRateCommand();
                 break;
@@ -274,16 +299,22 @@ public class ClientHandler implements Runnable {
             sendMessage("Please enter the driver's username and your rating (1-5):");
             try {
                 String input = reader.readLine();
-                String[] parts = input.split(" ");
+                String[] parts = input.split("-");
                 if (parts.length == 2) {
-                    String driverName = parts[0];
-                    double rating = Integer.parseInt(parts[1]);
-                    uberService.rateDriver(username, driverName, rating, this);
+                    String driverName = parts[0].trim();
+                    try{
+                        double rating = Integer.parseInt(parts[1].trim());
+                        uberService.rateDriver(driverName, username, rating, this);
+                    }catch (NumberFormatException e) {
+                        sendMessage("Invalid rating. Please enter a number between 1 and 5.");
+                    }
+
                 } else {
-                    sendMessage("Usage: /rate [driver username] [rating]");
+                    sendMessage("Usage: /rate [driver username] - [rating]");
                 }
             } catch (IOException e) {
                 sendMessage("Error reading input: " + e.getMessage());
+                closeEverything(socket, reader, writer);
             }
         } else {
             sendMessage("This command is only available for customers.");
@@ -393,7 +424,6 @@ public class ClientHandler implements Runnable {
     public void removeClient() {
         clients.remove(this);
         uberService.unregisterClientHandler(username, userType);
-        broadcast(userType + " " + username + " disconnected");
     }
 
     public void closeEverything(Socket socket, BufferedReader reader, BufferedWriter writer) {

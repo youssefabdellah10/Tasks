@@ -16,7 +16,8 @@ public class Database {
     private final ConcurrentHashMap<String, String> customerDriverPairs;
     private final ConcurrentHashMap<String, String> driverPendingOffers;
     private final ConcurrentHashMap<String, RideStatus> rideStatus;
-    private final ConcurrentHashMap<String[], Ride> rides;
+    private final ConcurrentHashMap<String, Ride> rides;
+    private final ConcurrentHashMap<String,List<Ride>> rideHistory;
     private final Object pairingLock = new Object();
     private final Object offerLock = new Object();
     private final Object rideLock = new Object();
@@ -31,6 +32,7 @@ public class Database {
         driverPendingOffers = new ConcurrentHashMap<>();
         rideStatus = new ConcurrentHashMap<>();
         rides = new ConcurrentHashMap<>();
+        rideHistory = new ConcurrentHashMap<>();
         
         admins.put("admin", new Admin("admin", "123"));
     }
@@ -184,14 +186,26 @@ public class Database {
     public RideStatus getRideStatus(String driverUsername) {
         return rideStatus.get(driverUsername);
     }
-    public Ride getRide(String cd[]) {
-        return rides.get(cd);
+    public Ride getCurrentRide(String customerUsername, String driverUsername) {
+        return rides.get(customerUsername + ":" +driverUsername);
     }
-    public Map<String[], Ride> getAllRides() {
-        return rides;
+
+    public void addRide(String customerUsername, String driverUsername, Ride ride) {
+        String key = customerUsername + ":" + driverUsername;
+        rides.put(key, ride);
+        String historyKey = customerUsername + ":" + driverUsername ;
+        List<Ride> history = rideHistory.getOrDefault(historyKey, new ArrayList<>());
+        history.add(ride);
+        rideHistory.put(historyKey, history);
     }
-    public void addRide(String cd[],Ride ride) {
-        rides.put(cd, ride);
+
+    public List<Ride> getRideHistory(String customerUsername, String driverUsername) {
+        String key = customerUsername + ":" + driverUsername;
+        return rideHistory.getOrDefault(key, new ArrayList<>());
+    }
+    public void archiveCompletedRide(String customerUsername, String driverUsername) {
+        String key = customerUsername + ":" + driverUsername;
+        rides.remove(key);
     }
     public void removeRideStatus(String driverUsername) {
         rideStatus.remove(driverUsername);

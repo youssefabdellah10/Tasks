@@ -6,6 +6,8 @@ public class Ride {
     private String pickupLocation;
     private String dropoffLocation;
     private RideStatus status;
+    private boolean rated;
+
     public void setStatus(RideStatus status) {
         this.status = status;
     }
@@ -14,6 +16,7 @@ public class Ride {
         this.driverUsername = driverUsername;
         this.pickupLocation = pickupLocation;
         this.dropoffLocation = dropoffLocation;
+        this.rated = false;
     }
     public String getCustomerUsername() {
         return customerUsername;
@@ -29,6 +32,12 @@ public class Ride {
     }
     public RideStatus getStatus() {
         return status;
+    }
+    public boolean isRated() {
+        return rated;
+    }
+    public void setRated(boolean rated) {
+        this.rated = rated;
     }
 
 }

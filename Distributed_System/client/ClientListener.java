@@ -37,6 +37,7 @@ public class ClientListener extends Thread {
                 if(messageFromServer.contains("Disconnected")) {
                     System.out.println("Server disconnected. Exiting...");
                     client.closeEverything(socket, reader, client.getWriter());
+                    System.exit(0);
                     break;
                 }
                 

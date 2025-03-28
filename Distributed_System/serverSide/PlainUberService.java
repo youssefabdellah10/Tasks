@@ -109,7 +109,11 @@ public class PlainUberService {
         customer.setHasAvtiveRide(true);
         database.pairCustomerDriver(customerUsername, driverUsername);
         database.setRideStatus(driverUsername, RideStatus.ON_THE_WAY);
-        
+        Ride ride = new Ride(customerUsername, driverUsername, customer.getCurrentLocation(), customer.getDestination());
+            String [] rideDetails = {customerUsername, driverUsername};
+            database.addRide(rideDetails,ride);
+            customerHandler.sendMessage("You have accepted the ride offer from driver " + driverUsername + 
+                              ". Driver is on the way to your pickup location.");
         ClientHandler driverHandler = database.getDriverHandler(driverUsername);
         if (driverHandler != null) {
             notifyRideAccepted(customerUsername, driverUsername, customerHandler, driverHandler);
@@ -207,6 +211,14 @@ public class PlainUberService {
         }
         
         database.setRideStatus(driverUsername, status);
+        String[] rideDetails = {customerUsername, driverUsername};
+        if(database.getRide(rideDetails) != null) {
+            database.getRide(rideDetails).setStatus(status);
+            driverHandler.sendMessage("Ride status updated to: " + status);
+        } else {
+            driverHandler.sendMessage("Ride not found for " + customerUsername + " and " + driverUsername);
+        }
+        
         ClientHandler customerHandler = database.getCustomerHandler(customerUsername);
         
         String statusMessage = getStatusMessage(driverUsername, status);
@@ -220,6 +232,24 @@ public class PlainUberService {
             }
         } else {
             driverHandler.sendMessage("Customer appears to be offline, but status was updated.");
+        }
+    }
+    public void rateDriver(String driverUsername,String customername, double rating, ClientHandler handler) {;
+        Ride ride = database.getRide(new String[]{customername, driverUsername});
+        if (ride == null) {
+            handler.sendMessage("Ride not found for " + customername + " and " + driverUsername);
+            return;
+        }
+        handler.sendMessage("Ride status: " + ride.getStatus());
+        if ( ride.getStatus() == RideStatus.COMPLETED) {
+            if (rating < 1 || rating > 5) {
+                handler.sendMessage("Rating must be between 1 and 5.");
+                return;
+            }
+            database.getDriver(driverUsername).updateRating(rating);
+            handler.sendMessage("Thank you for rating driver " + driverUsername + " with a score of " + rating);
+        } else {
+            handler.sendMessage("you cannot rate this driver, please wait until the ride is completed.");
         }
     }
     

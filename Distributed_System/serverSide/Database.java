@@ -16,7 +16,7 @@ public class Database {
     private final ConcurrentHashMap<String, String> customerDriverPairs;
     private final ConcurrentHashMap<String, String> driverPendingOffers;
     private final ConcurrentHashMap<String, RideStatus> rideStatus;
-    
+    private final ConcurrentHashMap<String[], Ride> rides;
     private final Object pairingLock = new Object();
     private final Object offerLock = new Object();
     private final Object rideLock = new Object();
@@ -30,6 +30,7 @@ public class Database {
         customerDriverPairs = new ConcurrentHashMap<>();
         driverPendingOffers = new ConcurrentHashMap<>();
         rideStatus = new ConcurrentHashMap<>();
+        rides = new ConcurrentHashMap<>();
         
         admins.put("admin", new Admin("admin", "123"));
     }
@@ -183,7 +184,15 @@ public class Database {
     public RideStatus getRideStatus(String driverUsername) {
         return rideStatus.get(driverUsername);
     }
-    
+    public Ride getRide(String cd[]) {
+        return rides.get(cd);
+    }
+    public Map<String[], Ride> getAllRides() {
+        return rides;
+    }
+    public void addRide(String cd[],Ride ride) {
+        rides.put(cd, ride);
+    }
     public void removeRideStatus(String driverUsername) {
         rideStatus.remove(driverUsername);
     }

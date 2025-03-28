@@ -185,21 +185,35 @@ public class Client {
     }
 
     public static void main(String[] args) throws IOException {
+        Scanner scn = new Scanner(System.in);
+        Socket socket = null;
         try {
-            Scanner scn = new Scanner(System.in);
-
             System.out.println("Welcome to the Uber App!");
             System.out.println("Are you a driver or customer or Admin? (d/c/a): ");
             String userTypeInput = scn.nextLine().toLowerCase();
             String userType = userTypeInput.startsWith("d") ? "DRIVER" : (userTypeInput.startsWith("a") ? "ADMIN" : "CUSTOMER");
             
-            Socket socket = new Socket("localhost", 5056);
+            socket = new Socket("localhost", 5056);
             Client client = new Client(socket, userType);
             
             client.listenForMessages();
             client.sendMessage();
+        } catch (IOException e) {
+            System.err.println("Error: Unable to connect to the server. Please try again later.");
+            e.printStackTrace(); 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("An unexpected error occurred: " + e.getMessage());
+            e.printStackTrace(); 
+        } finally {
+            scn.close();
+            if (socket != null && !socket.isClosed()) {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    System.err.println("Error: Unable to close the socket.");
+                }
+            }
         }
+
     }
 }

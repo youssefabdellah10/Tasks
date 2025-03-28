@@ -127,36 +127,10 @@ public class ClientHandler implements Runnable {
             case "/disconnect":
                 handleDisconnectCommand();
                 break;
-            case "/cancel":
-                if(userType.equals("CUSTOMER")){
-                    handleCancelRideCommand();
-                }
-                else{
-                    sendMessage("This command is only available for customers.");
-                }
+            case "/rate":
+                handleRateCommand();
                 break;
-            case "/rides":
-                if(userType.equals("ADMIN")){
-                    uberService.getAdminRideDetails(this);
-                }else{
-                    sendMessage("This command is only available for admins.");
-                }
-                break;
-
-            case "/customers":
-                if(userType.equals("ADMIN")){
-                    uberService.getAdminCustomerList(this);
-                }else{
-                    sendMessage("This command is only available for admins.");
-                }
-                break;
-            case "/drivers":
-                if(userType.equals("ADMIN")){
-                    uberService.getAdminDriverList(this);
-                }else{
-                    sendMessage("This command is only available for admins.");
-                }
-                break;
+                
             default:
                 sendMessage("Unknown command. Type /help for available commands.");
         }
@@ -295,6 +269,26 @@ public class ClientHandler implements Runnable {
             sendMessage("Usage: /offer [customer username] [fare amount]");
         }
     }
+    private void handleRateCommand(){
+        if (userType.equals("CUSTOMER")) {
+            sendMessage("Please enter the driver's username and your rating (1-5):");
+            try {
+                String input = reader.readLine();
+                String[] parts = input.split(" ");
+                if (parts.length == 2) {
+                    String driverName = parts[0];
+                    double rating = Integer.parseInt(parts[1]);
+                    uberService.rateDriver(username, driverName, rating, this);
+                } else {
+                    sendMessage("Usage: /rate [driver username] [rating]");
+                }
+            } catch (IOException e) {
+                sendMessage("Error reading input: " + e.getMessage());
+            }
+        } else {
+            sendMessage("This command is only available for customers.");
+        }
+    }
     
     private void handleAvailableCommand() {
         if (userType.equals("DRIVER")) {
@@ -328,6 +322,7 @@ public class ClientHandler implements Runnable {
             RideStatus status = parseRideStatus(statusType);
             if (status != null) {
                 uberService.updateRideStatus(username, pairedCustomer, status, this);
+                
             } else {
                 sendMessage("Invalid status. Use ONWAY, ARRIVED, STARTED, COMPLETED, or CANCELED.");
             }

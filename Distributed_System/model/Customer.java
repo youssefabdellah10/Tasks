@@ -27,4 +27,7 @@ public class Customer extends User {
     public void setHasAvtiveRide(boolean hasAvtiveRide) {
         this.hasAvtiveRide = hasAvtiveRide;
     }
+    public void setPassword(String password){
+        super.setPassword(password);
+    }
 }

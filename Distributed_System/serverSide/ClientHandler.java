@@ -1,6 +1,7 @@
 package serverSide;
 
-import Uber.*;
+import model.Customer;
+import model.Driver;
 import model.RideStatus;
 
 import java.io.BufferedReader;
@@ -78,6 +79,66 @@ public class ClientHandler implements Runnable {
     }
     
     private void handleCommand(String command) {
+
+        if (command.startsWith("/login ")) {
+            String password = command.substring("/login ".length());
+            boolean authenticated = false;
+
+            if (userType.equals("ADMIN")) {
+                authenticated = uberService.authenticateAdmin(username, password);
+            } else if (userType.equals("CUSTOMER")) {
+                authenticated = uberService.authenticateCustomer(username, password);
+            } else if (userType.equals("DRIVER")) {
+                authenticated = uberService.authenticateDriver(username, password);
+            }
+            
+            if (authenticated) {
+                sendMessage("Login successful. Welcome, " + username + "!");
+            } else {
+                sendMessage("Invalid username or password. Please try again.");
+            }
+            return;
+        }
+
+        if (command.startsWith("/register ")) {
+            String password = command.substring("/register ".length());
+            if (password.isEmpty()) {
+                sendMessage("Password cannot be empty.");
+                return;
+            }
+            
+            boolean success = false;
+            
+            if (userType.equals("CUSTOMER")) {
+                Customer existingCustomer = uberService.getCustomer(username);
+                if (existingCustomer != null && existingCustomer.getPassword() != null && 
+                    !existingCustomer.getPassword().isEmpty()) {
+                    sendMessage("Username already exists. Please choose a different username.");
+                } else {
+                    uberService.addCustomer(username, password);
+                    sendMessage("Registration successful. Welcome, " + username + "!");
+                    success = true;
+                }
+            } else if (userType.equals("DRIVER")) {
+                Driver existingDriver = uberService.getDriver(username);
+                if (existingDriver != null && existingDriver.getPassword() != null && 
+                    !existingDriver.getPassword().isEmpty()) {
+                    sendMessage("Username already exists. Please choose a different username.");
+                } else {
+                    uberService.addDriver(username, password);
+                    sendMessage("Registration successful. Welcome, " + username + "!");
+                    success = true;
+                }
+            } else {
+                sendMessage("Registration not available for this user type.");
+            }
+            
+            if (!success) {
+                sendMessage("Registration failed. Please try again with a different username.");
+            }
+            return;
+        }
+
         if (command.startsWith("/request ")) {
             String requestContent = command.substring("/request ".length());
             if (requestContent.contains(" to ")) {

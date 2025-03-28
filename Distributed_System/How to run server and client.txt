@@ -1,0 +1,32 @@
+How to run server and client?
+1-Compile the code
+2-Run the server
+# Start the server first
+java serverSide.Server
+3-Run the client
+# Open new terminal for each client
+java client.Client
+### Usage Flow
+1. Start the server first
+2. Run multiple client instances in separate terminals
+3. For each client, choose user type:
+   - Admin (a): Use credentials username: "admin", password: "123"
+   - Driver (d): Register or login
+   - Customer (c): Register or login
+
+### Important Notes
+- Server runs on port 5056 by default
+- Multiple clients can connect simultaneously
+- Default admin credentials are hardcoded (admin/123)
+- Ensure no other application is using port 5056
+- Run server before connecting any clients
+
+### System Requirements
+- JDK 8+ (recommended JDK 11 or 17)
+- Minimum 2GB RAM
+- Windows/Linux/macOS
+
+### Troubleshooting
+- If port 5056 is in use, modify the port number in Server.java
+- If connection fails, ensure server is running first
+- Check firewall settings if clients can't connect

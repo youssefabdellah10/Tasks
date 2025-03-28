@@ -141,6 +141,7 @@ public class Client {
             System.out.println("/cancel - Cancel your current ride request");
             System.out.println("/decline [driver] - Decline a ride offer from a driver");
             System.out.println("/disconnect - Disconnect from the server");
+            System.out.println("/rate - Rate a driver after your ride");
             System.out.println("/help - Show this help message");
         } else if (userType.equalsIgnoreCase("DRIVER")) {
             System.out.println("Commands:");

@@ -34,6 +34,11 @@ public class ClientListener extends Thread {
                 } else if (messageFromServer.contains("Registration successful")) {
                     client.setAuthenticationStatus(true);
                 }
+                if(messageFromServer.contains("Disconnected")) {
+                    System.out.println("Server disconnected. Exiting...");
+                    client.closeEverything(socket, reader, client.getWriter());
+                    break;
+                }
                 
                 System.out.println(messageFromServer);
             } catch (IOException e) {

@@ -40,7 +40,6 @@ public class Client {
     public void sendMessage() {
         try {
             Scanner scanner = new Scanner(System.in);
-            String username = "";
             
             if (userType.equalsIgnoreCase("ADMIN")) {
                 handleAdminLogin(scanner);
@@ -65,7 +64,7 @@ public class Client {
     
     private void handleAdminLogin(Scanner scanner) throws IOException {
         while (!authenticationCompleted || !authenticationSuccess) {
-            System.out.println("Welcome to admin login page ");
+            System.out.println("===== Admin Login =====");
             System.out.println("Enter your username: ");
             String username = scanner.nextLine();
             System.out.println("Enter your password: ");
@@ -81,7 +80,7 @@ public class Client {
             if (!authenticationSuccess && authenticationCompleted) {
                 System.out.println("Would you like to try again? (y/n)");
                 String response = scanner.nextLine();
-                if (!response.toLowerCase().startsWith("y")) {
+                if (response.toLowerCase().startsWith("n")) {
                     closeEverything(socket, reader, writer);
                     break;
                 }
@@ -92,13 +91,16 @@ public class Client {
     
     private void handleUserAuthentication(Scanner scanner) throws IOException {
         while (!authenticationCompleted || !authenticationSuccess) {
-            System.out.println("Tab 1 for login, Tab 2 for register");
+            System.out.println("===== " + userType + " Authentication =====");
+            System.out.println("1: Login");
+            System.out.println("2: Register");
+            System.out.print("Choice: ");
             String choice = scanner.nextLine();
             
             if (choice.equals("1") || choice.equals("2")) {
-                System.out.println("Enter your username: ");
+                System.out.print("Username: ");
                 String username = scanner.nextLine();
-                System.out.println("Enter your password: ");
+                System.out.print("Password: ");
                 String password = scanner.nextLine();
                 
                 writer.write(username + ":" + userType + "\n");
@@ -137,6 +139,7 @@ public class Client {
             System.out.println("/request [pickup location] to [destination] - Request a ride");
             System.out.println("/accept [driver] - Accept a ride offer from a driver");
             System.out.println("/decline [driver] - Decline a ride offer from a driver");
+            System.out.println("/disconnect - Disconnect from the server");
             System.out.println("/help - Show this help message");
         } else if (userType.equalsIgnoreCase("DRIVER")) {
             System.out.println("Commands:");
@@ -144,9 +147,11 @@ public class Client {
             System.out.println("/accept [customer] - Begin the process of accepting a customer's ride");
             System.out.println("/offer [customer] [fare] - Send a fare offer to a customer");
             System.out.println("/status [ONWAY|ARRIVED|STARTED|COMPLETED|CANCELED] - Update ride status");
+            System.out.println("/disconnect - Disconnect from the server");
             System.out.println("/help - Show this help message");
         } else {
             System.out.println("Admin commands available on server side.");
+            System.out.println("/disconnect - Disconnect from the server");
         }
         
         System.out.println("===========================\n");
@@ -176,7 +181,8 @@ public class Client {
     public static void main(String[] args) throws IOException {
         try {
             Scanner scn = new Scanner(System.in);
-            
+
+            System.out.println("Welcome to the Uber App!");
             System.out.println("Are you a driver or customer or Admin? (d/c/a): ");
             String userTypeInput = scn.nextLine().toLowerCase();
             String userType = userTypeInput.startsWith("d") ? "DRIVER" : (userTypeInput.startsWith("a") ? "ADMIN" : "CUSTOMER");

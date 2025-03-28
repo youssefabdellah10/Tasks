@@ -134,7 +134,7 @@ public class Database {
     
     public String getCustomerForDriver(String driverUsername) {
         for (Map.Entry<String, String> entry : customerDriverPairs.entrySet()) {
-            if (entry.getValue().equals(driverUsername)) {
+            if (driverUsername.equals(entry.getValue())) {
                 return entry.getKey();
             }
         }

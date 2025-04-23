@@ -1,0 +1,45 @@
+How to run server and client?
+1-Compile the code
+2-Run the server
+# Start the server first
+java serverSide.Server
+3-Run the client
+# Open new terminal for each client
+java client.Client
+### Usage Flow
+1. Start the server first
+2. Run multiple client instances in separate terminals
+3. For each client, choose user type:
+   - Admin (a): Use credentials username: "admin", password: "123"
+   - Driver (d): Register or login
+   - Customer (c): Register or login
+
+4-For Customer 
+	2
+	joe
+	123
+	/request naser city to downtown
+	/accept ali
+	option(
+		/rate
+		ali - 4
+		)
+
+	
+5-For Driver
+	2
+	ali
+	123
+	/offer joe 123
+	option(
+		/status ONWAY
+		/status ARRIVED
+		/status STARTED
+		/status COMPLETED
+		)
+6-For Admin
+	admin
+	123
+	/status
+	/rides
+	

@@ -14,19 +14,32 @@ java client.Client
    - Driver (d): Register or login
    - Customer (c): Register or login
 
-### Important Notes
-- Server runs on port 5056 by default
-- Multiple clients can connect simultaneously
-- Default admin credentials are hardcoded (admin/123)
-- Ensure no other application is using port 5056
-- Run server before connecting any clients
+4-For Customer 
+	2
+	joe
+	123
+	/request naser city to downtown
+	/accept ali
+	option(
+		/rate
+		ali - 4
+		)
 
-### System Requirements
-- JDK 8+ (recommended JDK 11 or 17)
-- Minimum 2GB RAM
-- Windows/Linux/macOS
-
-### Troubleshooting
-- If port 5056 is in use, modify the port number in Server.java
-- If connection fails, ensure server is running first
-- Check firewall settings if clients can't connect
+	
+5-For Driver
+	2
+	ali
+	123
+	/offer joe 123
+	option(
+		/status ONWAY
+		/status ARRIVED
+		/status STARTED
+		/status COMPLETED
+		)
+6-For Admin
+	admin
+	123
+	/status
+	/rides
+	

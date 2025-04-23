@@ -32,4 +32,7 @@ public class Driver extends User {
     public void setCurrentLocation(String currentLocation) {
         this.currentLocation = currentLocation;
     }
+    public void setPassword(String password){
+        super.setPassword(password);
+    }
 }

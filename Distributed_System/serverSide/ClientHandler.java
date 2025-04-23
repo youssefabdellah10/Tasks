@@ -1,6 +1,9 @@
 package serverSide;
 
-import Uber.*;
+import model.Customer;
+import model.Driver;
+import model.RideStatus;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -32,14 +35,12 @@ public class ClientHandler implements Runnable {
                 this.userType = parts[1].toUpperCase();
             } else {
                 this.username = userInfo;
-                this.userType = "UNKNOWN";
             }
             
             this.uberService = PlainUberService.getInstance();
             uberService.registerClientHandler(username, userType, this);
             
             clients.add(this);
-            broadcast(userType + " " + username + " connected");
         } catch (IOException e) {
             closeEverything(socket, reader, writer);
         }
@@ -50,14 +51,11 @@ public class ClientHandler implements Runnable {
         String messageFromClient;
         while (socket.isConnected()) {
             try {
-                messageFromClient = reader.readLine();
-                if (messageFromClient == null) {
-                    closeEverything(socket, reader, writer);
-                    break;
+                while (socket.isConnected() && (messageFromClient = reader.readLine()) != null) {
+                    processMessage(messageFromClient);
                 }
-                
-                processMessage(messageFromClient);
             } catch (IOException e) {
+                System.out.println("Client " + username + " disconnected.");
                 closeEverything(socket, reader, writer);
                 break;
             }
@@ -68,29 +66,23 @@ public class ClientHandler implements Runnable {
         if (message.startsWith("/")) {
             System.out.println("Command received from " + username + ": " + message);
             handleCommand(message);
-            return;
-        }
-        if (message.trim().isEmpty()) {
-            return;
         }
     }
     
     private void handleCommand(String command) {
+
+        if (command.startsWith("/login ")) {
+            handleLoginCommand(command);
+            return;
+        }
+
+        if (command.startsWith("/register ")) {
+            handleRegisterCommand(command);
+            return;
+        }
+
         if (command.startsWith("/request ")) {
-            String requestContent = command.substring("/request ".length());
-            if (requestContent.contains(" to ")) {
-                String[] locationParts = requestContent.split(" to ", 2);
-                if (locationParts.length == 2) {
-                    String pickupLocation = locationParts[0].trim();
-                    String destination = locationParts[1].trim();
-                    uberService.requestRide(username, pickupLocation, destination, this);
-                } else {
-                    sendMessage("Usage: /request [pickup location] to [destination]");
-                }
-            } else {
-                uberService.requestRide(username, requestContent, "Not specified", this);
-                sendMessage("Tip: You can also specify a destination with: /request [pickup] to [destination]");
-            }
+            handleRequestCommand(command);
             return;
         }
 
@@ -99,70 +91,311 @@ public class ClientHandler implements Runnable {
         
         switch (cmd) {
             case "/accept":
-                if (userType.equals("DRIVER") && parts.length > 1) {
-                    String customerName = parts[1];
-                    uberService.acceptRide(username, customerName, this);
-                } else if (userType.equals("CUSTOMER") && parts.length > 1) {
-                    String driverName = parts[1];
-                    uberService.acceptOffer(driverName, username, this);
-                } else {
-                    if (userType.equals("DRIVER")) {
-                        sendMessage("Usage: /accept [customer username]");
-                    } else {
-                        sendMessage("Usage: /accept [driver username]");
-                    }
-                }
+                handleAcceptCommand(parts);
                 break;
                 
             case "/decline":
-                if (userType.equals("CUSTOMER") && parts.length > 1) {
-                    String driverName = parts[1];
-                    uberService.declineOffer(driverName, username, this);
-                } else {
-                    sendMessage("Usage: /decline [driver username]");
-                }
+                handleDeclineCommand(parts);
                 break;
                     
             case "/offer":
-                if (userType.equals("DRIVER") && parts.length > 2) {
-                    String customerName = parts[1];
-                    try {
-                        double fare = Double.parseDouble(parts[2]);
-                        uberService.processOfferCommand(username, customerName, fare, this);
-                    } catch (NumberFormatException e) {
-                        sendMessage("Invalid fare amount. Please enter a valid number.");
-                    }
-                } else {
-                    sendMessage("Usage: /offer [customer username] [fare amount]");
-                }
+                handleOfferCommand(parts);
                 break;
                 
             case "/available":
-                if (userType.equals("DRIVER")) {
-                    uberService.listAvailableRequests(username, this);
-                } else {
+                handleAvailableCommand();
+                break;
+
+            case "/help":
+                uberService.sendHelpMessage(userType, this);
+                break;
+
+            case "/status":
+                if(userType.equals("ADMIN")){
+                    uberService.getAdminSystemStatus(this);
+                }else if(userType.equals("DRIVER")){
+                    handleStatusCommand(parts);
+                }else{
                     sendMessage("This command is only available for drivers.");
                 }
                 break;
-                
-                case "/help":
-                if (userType.equals("CUSTOMER")) {
-                    sendMessage("Available commands:\n" +
-                        "/request [pickup location] to [destination] - Request a ride\n" +
-                        "/accept [driver] - Accept a ride offer from a driver\n" +
-                        "/decline [driver] - Decline a ride offer from a driver\n" +
-                        "/help - Show this help message");
-                } else {
-                    sendMessage("Available commands:\n" +
-                        "/available - List all available ride requests\n" +
-                        "/accept [customer] - Begin the process of accepting a customer's ride\n" +
-                        "/offer [customer] [fare] - Send a fare offer to a customer\n" +
-                        "/help - Show this help message");
-                }
+            case "/disconnect":
+                handleDisconnectCommand();
+                break;
+                case "/cancel":
+                    if(userType.equals("CUSTOMER")){
+                        handleCancelRideCommand();
+                    }
+                    else{
+                        sendMessage("This command is only available for customers.");
+                    }
+                    break;
+                case "/rides":
+                    if(userType.equals("ADMIN")){
+                        uberService.getAdminRideDetails(this);
+                    }else{
+                        sendMessage("This command is only available for admins.");
+                    }
+                    break;
+
+                case "/customers":
+                    if(userType.equals("ADMIN")){
+                        uberService.getAdminCustomerList(this);
+                    }else{
+                        sendMessage("This command is only available for admins.");
+                    }
+                    break;
+                case "/drivers":
+                    if(userType.equals("ADMIN")){
+                        uberService.getAdminDriverList(this);
+                    }else{
+                        sendMessage("This command is only available for admins.");
+                    }
+                    break;
+            case "/rate":
+                handleRateCommand();
                 break;
                 
             default:
                 sendMessage("Unknown command. Type /help for available commands.");
+        }
+    }
+
+    private void handleCancelRideCommand(){
+        Customer customer = uberService.getCustomer(username);
+        if(customer == null){
+            sendMessage("Error");
+            return;
+        }
+        if(customer.isHasAvtiveRide()){
+            sendMessage("You can not cancel the ride while you have an active ride.");
+            return;
+        }
+        if(customer.getCurrentLocation() == null || customer.getCurrentLocation().isEmpty()){
+            sendMessage("You can not cancel the ride while you have no active ride.");
+            return;
+        }
+        uberService.cancelRideRequest(username, this);
+    }
+    
+    private void handleLoginCommand(String command) {
+        String password = command.substring("/login ".length());
+        boolean authenticated = false;
+
+        switch (userType) {
+            case "ADMIN":
+                authenticated = uberService.authenticateAdmin(username, password);
+                break;
+            case "CUSTOMER":
+                authenticated = uberService.authenticateCustomer(username, password);
+                break;
+            case "DRIVER":
+                authenticated = uberService.authenticateDriver(username, password);
+                break;
+        }
+        
+        if (authenticated) {
+            sendMessage("Login successful. Welcome, " + username + "!");
+        } else {
+            sendMessage("Invalid username or password. Please try again.");
+        }
+    }
+    
+    private void handleRegisterCommand(String command) {
+        String password = command.substring("/register ".length());
+        if (password.isEmpty()) {
+            sendMessage("Password cannot be empty.");
+            return;
+        }
+        
+        boolean success = false;
+        
+        if (userType.equals("CUSTOMER")) {
+            Customer existingCustomer = uberService.getCustomer(username);
+            if (existingCustomer != null && existingCustomer.getPassword() != null && 
+                !existingCustomer.getPassword().isEmpty()) {
+                sendMessage("Username already exists. Please choose a different username.");
+            } else {
+                uberService.addCustomer(username, password);
+                sendMessage("Registration successful. Welcome, " + username + "!");
+                success = true;
+            }
+        } else if (userType.equals("DRIVER")) {
+            Driver existingDriver = uberService.getDriver(username);
+            if (existingDriver != null && existingDriver.getPassword() != null && 
+                !existingDriver.getPassword().isEmpty()) {
+                sendMessage("Username already exists. Please choose a different username.");
+            } else {
+                uberService.addDriver(username, password);
+                sendMessage("Registration successful. Welcome, " + username + "!");
+                success = true;
+            }
+        } else {
+            sendMessage("Registration not available for this user type.");
+        }
+        
+        if (!success) {
+            sendMessage("Registration failed. Please try again with a different username.");
+        }
+    }
+    
+    private void handleRequestCommand(String command) {
+        String requestContent = command.substring("/request ".length());
+        if (requestContent.contains(" to ")) {
+            String[] locationParts = requestContent.split(" to ", 2);
+            if (locationParts.length == 2) {
+                String pickupLocation = locationParts[0].trim();
+                String destination = locationParts[1].trim();
+                uberService.requestRide(username, pickupLocation, destination, this);
+            } else {
+                sendMessage("Usage: /request [pickup location] to [destination]");
+            }
+        } else {
+            uberService.requestRide(username, requestContent, "Not specified", this);
+            sendMessage("Tip: You can also specify a destination with: /request [pickup] to [destination]");
+        }
+    }
+    
+    private void handleAcceptCommand(String[] parts) {
+        if (userType.equals("DRIVER") && parts.length > 1) {
+            String customerName = parts[1];
+            uberService.acceptRide(username, customerName, this);
+        } else if (userType.equals("CUSTOMER") && parts.length > 1) {
+            String driverName = parts[1];
+            uberService.acceptOffer(driverName, username, this);
+        } else {
+            if (userType.equals("DRIVER")) {
+                sendMessage("Usage: /accept [customer username]");
+            } else {
+                sendMessage("Usage: /accept [driver username]");
+            }
+        }
+    }
+    
+    private void handleDeclineCommand(String[] parts) {
+        if (userType.equals("CUSTOMER") && parts.length > 1) {
+            String driverName = parts[1];
+            uberService.declineOffer(driverName, username, this);
+        } else {
+            sendMessage("Usage: /decline [driver username]");
+        }
+    }
+    
+    private void handleOfferCommand(String[] parts) {
+        if (userType.equals("DRIVER") && parts.length > 2) {
+            String customerName = parts[1];
+            try {
+                double fare = Double.parseDouble(parts[2]);
+                uberService.processOfferCommand(username, customerName, fare, this);
+            } catch (NumberFormatException e) {
+                sendMessage("Invalid fare amount. Please enter a valid number.");
+            }
+        } else {
+            sendMessage("Usage: /offer [customer username] [fare amount]");
+        }
+    }
+    private void handleRateCommand(){
+        if (userType.equals("CUSTOMER")) {
+            sendMessage("Please enter the driver's username and your rating (1-5):");
+            try {
+                String input = reader.readLine();
+                String[] parts = input.split("-");
+                if (parts.length == 2) {
+                    String driverName = parts[0].trim();
+                    try{
+                        double rating = Integer.parseInt(parts[1].trim());
+                        uberService.rateDriver(driverName, username, rating, this);
+                    }catch (NumberFormatException e) {
+                        sendMessage("Invalid rating. Please enter a number between 1 and 5.");
+                    }
+
+                } else {
+                    sendMessage("Usage: /rate [driver username] - [rating]");
+                }
+            } catch (IOException e) {
+                sendMessage("Error reading input: " + e.getMessage());
+                closeEverything(socket, reader, writer);
+            }
+        } else {
+            sendMessage("This command is only available for customers.");
+        }
+    }
+    
+    private void handleAvailableCommand() {
+        if (userType.equals("DRIVER")) {
+            uberService.listAvailableRequests(username, this);
+        } else {
+            sendMessage("This command is only available for drivers.");
+        }
+    }
+    
+    private void handleStatusCommand(String[] parts) {
+        if (!userType.equals("DRIVER")) {
+            sendMessage("Only drivers can update ride status.");
+            return;
+        }
+        
+        if (parts.length < 2) {
+            sendMessage("Usage: /status [STATUS_TYPE]");
+            sendMessage("Available statuses: ONWAY, ARRIVED, STARTED, COMPLETED, CANCELED");
+            return;
+        }
+        
+        String statusType = parts[1].toUpperCase();
+        String pairedCustomer = uberService.getPairedCustomerForDriver(username);
+        
+        if (pairedCustomer == null) {
+            sendMessage("You don't have an active ride.");
+            return;
+        }
+        
+        try {
+            RideStatus status = parseRideStatus(statusType);
+            if (status != null) {
+                uberService.updateRideStatus(username, pairedCustomer, status, this);
+                
+            } else {
+                sendMessage("Invalid status. Use ONWAY, ARRIVED, STARTED, COMPLETED, or CANCELED.");
+            }
+        } catch (Exception e) {
+            sendMessage("Error updating ride status: " + e.getMessage());
+        }
+    }
+    
+    private RideStatus parseRideStatus(String statusType) {
+        switch (statusType) {
+            case "ONWAY": return RideStatus.ON_THE_WAY;
+            case "ARRIVED": return RideStatus.ARRIVED;
+            case "STARTED": return RideStatus.STARTED;
+            case "COMPLETED": return RideStatus.COMPLETED;
+            case "CANCELED": return RideStatus.CANCELED;
+            default: return null;
+        }
+    }
+
+    private void handleDisconnectCommand() {
+        boolean canDisconnect = true;
+        String errorMessage ="";
+
+        if(userType.equals("CUSTOMER")){
+            Customer customer = uberService.getCustomer(username);
+            if(customer != null && customer.isHasAvtiveRide()) {
+                canDisconnect = false;
+                errorMessage = "You cannot disconnect while you have an active ride.";
+            }
+        }else if(userType.equals("DRIVER")){
+            Driver driver = uberService.getDriver(username);
+            String pairedCustomer = uberService.getPairedCustomerForDriver(username);
+            if(pairedCustomer != null || (driver != null && !driver.isAvaialable())) {
+                canDisconnect = false;
+                errorMessage = "You cannot disconnect while you have an active ride. Please complete or cancel the ride first.";
+            }
+        }
+        if(canDisconnect) {
+            sendMessage("You have been disconnected. Goodbye!");
+            closeEverything(socket, reader, writer);
+        } else {
+            sendMessage(errorMessage);
         }
     }
     
@@ -178,12 +411,12 @@ public class ClientHandler implements Runnable {
     public void broadcast(String message) {
         for (ClientHandler client : clients) {
             try {
-                if (!client.username.equals(username)) {
+                if (client != this) {
                     client.writer.write(message + "\n");
                     client.writer.flush();
                 }
             } catch (Exception e) {
-                closeEverything(socket, reader, writer);
+                closeEverything(client.socket, client.reader, client.writer);
             }
         }
     }
@@ -191,8 +424,6 @@ public class ClientHandler implements Runnable {
     public void removeClient() {
         clients.remove(this);
         uberService.unregisterClientHandler(username, userType);
-        
-        broadcast(userType + " " + username + " disconnected");
     }
 
     public void closeEverything(Socket socket, BufferedReader reader, BufferedWriter writer) {
@@ -210,5 +441,10 @@ public class ClientHandler implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+
+    public String getUserType() {
+        return this.userType;
     }
 }

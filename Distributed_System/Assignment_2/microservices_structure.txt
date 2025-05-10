@@ -1,0 +1,311 @@
+# Three-Microservice Architecture File Structure (All Java EE with RabbitMQ)
+
+## 1. Admin Service (Java EE)
+
+```
+admin-service/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/
+│   │   │       └── ecommerce/
+│   │   │           └── admin/
+│   │   │               ├── config/
+│   │   │               │   ├── AppConfig.java
+│   │   │               │   ├── RabbitMQConfig.java
+│   │   │               │   └── DatabaseConfig.java
+│   │   │               ├── controllers/
+│   │   │               │   ├── AdminController.java
+│   │   │               │   ├── AnalyticsController.java
+│   │   │               │   ├── ConfigController.java
+│   │   │               │   └── MonitoringController.java
+│   │   │               ├── dto/
+│   │   │               │   ├── AdminDTO.java
+│   │   │               │   ├── ConfigDTO.java
+│   │   │               │   └── AuditLogDTO.java
+│   │   │               ├── entities/
+│   │   │               │   ├── Admin.java
+│   │   │               │   ├── Config.java
+│   │   │               │   └── AuditLog.java
+│   │   │               ├── exceptions/
+│   │   │               │   ├── AdminNotFoundException.java
+│   │   │               │   └── ConfigNotFoundException.java
+│   │   │               ├── repositories/
+│   │   │               │   ├── AdminRepository.java
+│   │   │               │   ├── ConfigRepository.java
+│   │   │               │   └── AuditLogRepository.java
+│   │   │               ├── services/
+│   │   │               │   ├── AdminService.java 
+│   │   │               │   ├── AnalyticsService.java
+│   │   │               │   ├── MonitoringService.java
+│   │   │               │   └── RegistryService.java
+│   │   │               ├── messaging/
+│   │   │               │   ├── RabbitMQSender.java
+│   │   │               │   ├── RabbitMQReceiver.java
+│   │   │               │   └── MessageProcessor.java
+│   │   │               ├── utils/
+│   │   │               │   ├── LoggerUtil.java
+│   │   │               │   └── ServiceDiscoveryUtil.java
+│   │   │               └── AdminServiceApplication.java
+│   │   ├── resources/
+│   │   │   ├── META-INF/
+│   │   │   │   └── persistence.xml
+│   │   │   └── application.properties
+│   │   └── webapp/
+│   │       └── WEB-INF/
+│   │           ├── beans.xml
+│   │           └── web.xml
+│   └── test/
+│       └── java/
+│           └── com/
+│               └── ecommerce/
+│                   └── admin/
+│                       ├── controllers/
+│                       ├── services/
+│                       └── repositories/
+├── pom.xml
+└── README.md
+```
+
+## 2. Seller Service (Java EE)
+
+```
+seller-service/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/
+│   │   │       └── ecommerce/
+│   │   │           └── seller/
+│   │   │               ├── config/
+│   │   │               │   ├── AppConfig.java
+│   │   │               │   ├── RabbitMQConfig.java
+│   │   │               │   └── DatabaseConfig.java
+│   │   │               ├── controllers/
+│   │   │               │   ├── SellerController.java
+│   │   │               │   ├── ProductController.java
+│   │   │               │   ├── InventoryController.java
+│   │   │               │   └── OrderController.java
+│   │   │               ├── dto/
+│   │   │               │   ├── SellerDTO.java
+│   │   │               │   ├── ProductDTO.java
+│   │   │               │   ├── InventoryDTO.java
+│   │   │               │   └── OrderDTO.java
+│   │   │               ├── entities/
+│   │   │               │   ├── Seller.java
+│   │   │               │   ├── Product.java
+│   │   │               │   ├── Inventory.java
+│   │   │               │   └── Order.java
+│   │   │               ├── exceptions/
+│   │   │               │   ├── SellerNotFoundException.java
+│   │   │               │   ├── ProductNotFoundException.java
+│   │   │               │   └── InventoryException.java
+│   │   │               ├── repositories/
+│   │   │               │   ├── SellerRepository.java
+│   │   │               │   ├── ProductRepository.java
+│   │   │               │   ├── InventoryRepository.java
+│   │   │               │   └── OrderRepository.java
+│   │   │               ├── services/
+│   │   │               │   ├── SellerService.java
+│   │   │               │   ├── ProductService.java
+│   │   │               │   ├── InventoryService.java
+│   │   │               │   ├── OrderService.java
+│   │   │               │   ├── PaymentService.java
+│   │   │               │   └── NotificationService.java
+│   │   │               ├── messaging/
+│   │   │               │   ├── RabbitMQSender.java
+│   │   │               │   ├── RabbitMQReceiver.java
+│   │   │               │   └── MessageProcessor.java
+│   │   │               ├── utils/
+│   │   │               │   ├── LoggerUtil.java
+│   │   │               │   └── AuthUtil.java
+│   │   │               └── SellerServiceApplication.java
+│   │   ├── resources/
+│   │   │   ├── META-INF/
+│   │   │   │   └── persistence.xml
+│   │   │   └── application.properties
+│   │   └── webapp/
+│   │       └── WEB-INF/
+│   │           ├── beans.xml
+│   │           └── web.xml
+│   └── test/
+│       └── java/
+│           └── com/
+│               └── ecommerce/
+│                   └── seller/
+│                       ├── controllers/
+│                       ├── services/
+│                       └── repositories/
+├── pom.xml
+└── README.md
+```
+
+## 3. Customer Service (Java EE)
+
+```
+customer-service/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/
+│   │   │       └── ecommerce/
+│   │   │           └── customer/
+│   │   │               ├── config/
+│   │   │               │   ├── AppConfig.java
+│   │   │               │   ├── RabbitMQConfig.java
+│   │   │               │   └── DatabaseConfig.java
+│   │   │               ├── controllers/
+│   │   │               │   ├── CustomerController.java
+│   │   │               │   ├── OrderController.java
+│   │   │               │   ├── ProductBrowsingController.java
+│   │   │               │   ├── ReviewController.java
+│   │   │               │   ├── CartController.java
+│   │   │               │   └── PaymentController.java
+│   │   │               ├── dto/
+│   │   │               │   ├── CustomerDTO.java
+│   │   │               │   ├── OrderDTO.java
+│   │   │               │   ├── CartItemDTO.java
+│   │   │               │   ├── ProductDTO.java
+│   │   │               │   └── ReviewDTO.java
+│   │   │               ├── entities/
+│   │   │               │   ├── Customer.java
+│   │   │               │   ├── Order.java
+│   │   │               │   ├── CartItem.java
+│   │   │               │   ├── Payment.java
+│   │   │               │   ├── ShippingInfo.java
+│   │   │               │   └── Review.java
+│   │   │               ├── exceptions/
+│   │   │               │   ├── CustomerNotFoundException.java
+│   │   │               │   ├── OrderNotFoundException.java
+│   │   │               │   └── PaymentFailedException.java
+│   │   │               ├── repositories/
+│   │   │               │   ├── CustomerRepository.java
+│   │   │               │   ├── OrderRepository.java
+│   │   │               │   ├── CartRepository.java
+│   │   │               │   └── ReviewRepository.java
+│   │   │               ├── services/
+│   │   │               │   ├── CustomerService.java
+│   │   │               │   ├── OrderService.java
+│   │   │               │   ├── CartService.java
+│   │   │               │   ├── PaymentService.java
+│   │   │               │   ├── ProductBrowsingService.java
+│   │   │               │   ├── ReviewService.java
+│   │   │               │   └── NotificationService.java
+│   │   │               ├── messaging/
+│   │   │               │   ├── RabbitMQSender.java
+│   │   │               │   ├── RabbitMQReceiver.java
+│   │   │               │   └── MessageProcessor.java
+│   │   │               ├── utils/
+│   │   │               │   ├── JwtUtil.java
+│   │   │               │   ├── RestClient.java
+│   │   │               │   └── LoggerUtil.java
+│   │   │               └── CustomerServiceApplication.java
+│   │   ├── resources/
+│   │   │   ├── META-INF/
+│   │   │   │   └── persistence.xml
+│   │   │   └── application.properties
+│   │   └── webapp/
+│   │       └── WEB-INF/
+│   │           ├── beans.xml
+│   │           └── web.xml
+│   └── test/
+│       └── java/
+│           └── com/
+│               └── ecommerce/
+│                   └── customer/
+│                       ├── controllers/
+│                       ├── services/
+│                       └── repositories/
+├── pom.xml
+└── README.md
+```
+
+## 4. Shared Infrastructure
+
+```
+shared-infrastructure/
+├── api-gateway/
+│   ├── config/
+│   │   ├── routes.json
+│   │   └── security.json
+│   ├── Dockerfile
+│   └── README.md
+├── rabbitmq/
+│   ├── config/
+│   │   ├── rabbitmq.conf
+│   │   └── enabled_plugins
+│   ├── definitions/
+│   │   └── definitions.json
+│   ├── Dockerfile
+│   └── README.md
+├── monitoring/
+│   ├── prometheus/
+│   │   └── prometheus.yml
+│   ├── grafana/
+│   │   └── dashboards/
+│   └── README.md
+├── logging/
+│   ├── elasticsearch/
+│   ├── logstash/
+│   ├── kibana/
+│   └── README.md
+├── docker-compose.yml
+└── README.md
+```
+
+## Java EE Components Used Across All Services
+
+Since all three services are implemented using Java EE, they share common Java EE technologies:
+
+1. **JAX-RS (Java API for RESTful Web Services)**
+   - Used in the controllers to create RESTful endpoints
+   - Annotations like `@Path`, `@GET`, `@POST`, etc.
+
+2. **JPA (Java Persistence API)**
+   - Used in entities and repositories
+   - Annotations like `@Entity`, `@Table`, `@Id`, etc.
+   - Configuration in `persistence.xml`
+
+3. **EJB (Enterprise JavaBeans)**
+   - Used in services for transaction management
+   - Annotations like `@Stateless`, `@TransactionAttribute`
+
+4. **CDI (Contexts and Dependency Injection)**
+   - Used for dependency injection
+   - Annotations like `@Inject`, `@Produces`
+   - Configuration in `beans.xml`
+
+5. **Bean Validation**
+   - Used for data validation
+   - Annotations like `@NotNull`, `@Size`, `@Email`
+
+6. **JMS (Java Message Service)**
+   - Used with RabbitMQ for messaging between services
+   - Implementation in the messaging package of each service
+
+7. **Java EE Security**
+   - Used for authentication and authorization
+   - Configured in `web.xml`
+
+## RabbitMQ Integration
+
+RabbitMQ is used for asynchronous communication between the microservices:
+
+1. **Common Message Exchange Patterns**:
+   - **Direct Exchange**: For point-to-point communication (e.g., Order Service to Inventory Service)
+   - **Topic Exchange**: For publish/subscribe patterns based on routing keys
+   - **Fanout Exchange**: For broadcasting messages to multiple consumers
+
+2. **Key Message Flows**:
+   - **Order Processing**: Customer Service → Seller Service (order placement)
+   - **Inventory Updates**: Seller Service → Customer Service (stock notifications)
+   - **Analytics Events**: All Services → Admin Service (for dashboards and reporting)
+   - **Notifications**: All Services can publish notifications for their domain
+
+3. **Implementation Details**:
+   - Each service has a `RabbitMQConfig.java` for connection settings
+   - `RabbitMQSender.java` handles message publishing
+   - `RabbitMQReceiver.java` sets up listeners for incoming messages
+   - `MessageProcessor.java` processes received messages and routes to appropriate service methods
+
+This architecture separates the three services clearly while using Java EE across all services. RabbitMQ enables asynchronous communication, making the system more resilient and scalable.

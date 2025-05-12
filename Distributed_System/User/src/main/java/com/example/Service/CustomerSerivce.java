@@ -34,16 +34,5 @@ public class CustomerSerivce {
             return null;
         }
     }
-    public boolean login(String username, String password) {
-        try {
-            Customer customer = entityManager.find(Customer.class, username);
-            if (customer != null && customer.getPassword().equals(password)) {
-                return true; // Login successful
-            }
-            return false; // Invalid credentials
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+   
 }

@@ -1,0 +1,89 @@
+package com.example.Controller;
+
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+
+import com.example.Model.Company;
+import com.example.Service.CompanyService;
+
+import java.util.List;
+
+@Path("/company")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class CompanyController {
+    
+    @Inject
+    CompanyService companyService;
+
+    @GET
+    @Path("/all")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllCompanies() {
+        try {
+            List<Company> companies = companyService.getAllCompanies();
+            if (companies == null || companies.isEmpty()) {
+                return Response.status(Response.Status.NO_CONTENT)
+                        .entity("No companies found")
+                        .build();
+            }
+            return Response.status(Response.Status.OK)
+                    .entity(companies)
+                    .build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error retrieving companies: " + e.getMessage())
+                    .build();
+        }
+    }
+    
+    @POST
+    @Path("/create")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response createCompany(Company company) {
+        try {
+            boolean isCreated = companyService.saveCompany(company);
+            if (!isCreated) {
+                return Response.status(Response.Status.CONFLICT)
+                        .entity("Company with name " + company.getCompanyName() + " already exists.")
+                        .build();
+            }
+            return Response.status(Response.Status.CREATED)
+                    .entity("Company created successfully")
+                    .build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error creating company: " + e.getMessage())
+                    .build();
+        }
+    }
+    
+    @POST
+    @Path("/create-with-names")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response createCompanyWithUniqueNames(
+            @QueryParam("name") String companyName,
+            @QueryParam("address") String companyAddress,
+            @QueryParam("uniqueCount") @DefaultValue("3") int uniqueCount) {
+        try {
+            Company company = companyService.createCompanyWithUniqueNames(companyName, companyAddress, uniqueCount);
+            if (company == null) {
+                return Response.status(Response.Status.CONFLICT)
+                        .entity("Failed to create company. Company may already exist.")
+                        .build();
+            }
+            return Response.status(Response.Status.CREATED)
+                    .entity(company)
+                    .build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error creating company: " + e.getMessage())
+                    .build();
+        }
+    }
+}

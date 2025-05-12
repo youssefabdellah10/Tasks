@@ -60,9 +60,8 @@
             <version>5.6.15.Final</version>
         </dependency>
     </dependencies>
-    
-    <build>
-        <finalName>hello-world</finalName>
+      <build>
+        <finalName>users</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

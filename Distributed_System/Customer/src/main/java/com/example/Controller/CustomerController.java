@@ -6,6 +6,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import com.example.Model.Customer;
 import com.example.Service.CustomerSerivce;
+import java.util.List;
 
 @Path("/customer")
 @Produces(MediaType.APPLICATION_JSON)
@@ -14,14 +15,6 @@ public class CustomerController {
       
     @Inject
     CustomerSerivce customerService;
-    
-    // Add this simple test endpoint
-    @GET
-    @Path("/hello")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String hello() {
-        return "Hello, JAX-RS is working!";
-    }
     
     @POST
     @Path("/register")
@@ -44,4 +37,26 @@ public class CustomerController {
                     .build();
         }
     } 
+    
+    @GET
+    @Path("/all")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllCustomers() {
+        try {
+            List<Customer> customers = customerService.getAllCustomers();
+            if (customers == null || customers.isEmpty()) {
+                return Response.status(Response.Status.NO_CONTENT)
+                        .entity("No customers found")
+                        .build();
+            }
+            return Response.status(Response.Status.OK)
+                    .entity(customers)
+                    .build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error retrieving customers: " + e.getMessage())
+                    .build();
+        }
+    }
 }

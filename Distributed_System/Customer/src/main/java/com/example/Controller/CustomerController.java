@@ -15,7 +15,7 @@ public class CustomerController {
       
     @Inject
     CustomerSerivce customerService;
-    
+
     @POST
     @Path("/register")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -59,4 +59,27 @@ public class CustomerController {
                     .build();
         }
     }
+    
+    @POST
+    @Path("/login")
+    public Response login(@QueryParam("username") String username, @QueryParam("password") String password) {
+        try {
+            boolean isLoggedIn = customerService.login(username, password);
+            if (isLoggedIn) {
+                return Response.status(Response.Status.OK)
+                        .entity("Login successful")
+                        .build();
+            } else {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                        .entity("Invalid credentials")
+                        .build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error during login: " + e.getMessage())
+                    .build();
+        }
+    }
+    
 }

@@ -16,9 +16,7 @@ import java.util.List;
 public class CompanyController {
     
     @Inject
-    CompanyService companyService;
-
-    @GET
+    CompanyService companyService;    @GET
     @Path("/all")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllCompanies() {
@@ -29,8 +27,14 @@ public class CompanyController {
                         .entity("No companies found")
                         .build();
             }
+            
+            // Extract only company names to avoid serialization issues
+            List<String> companyNames = companies.stream()
+                .map(Company::getCompanyName)
+                .collect(java.util.stream.Collectors.toList());
+            
             return Response.status(Response.Status.OK)
-                    .entity(companies)
+                    .entity(companyNames)
                     .build();
         } catch (Exception e) {
             e.printStackTrace();
@@ -61,8 +65,7 @@ public class CompanyController {
                     .build();
         }
     }
-    
-    @POST
+      @POST
     @Path("/create-with-names")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createCompanyWithUniqueNames(
@@ -76,8 +79,15 @@ public class CompanyController {
                         .entity("Failed to create company. Company may already exist.")
                         .build();
             }
+            
+            // Create a simple map with only the needed information to avoid serialization issues
+            java.util.Map<String, Object> resultMap = new java.util.HashMap<>();
+            resultMap.put("companyName", company.getCompanyName());
+            resultMap.put("companyAddress", company.getCompanyAddress());
+            resultMap.put("companyUniqueNames", company.getCompanyUniqueNames());
+            
             return Response.status(Response.Status.CREATED)
-                    .entity(company)
+                    .entity(resultMap)
                     .build();
         } catch (Exception e) {
             e.printStackTrace();

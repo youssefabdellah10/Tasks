@@ -1,12 +1,156 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Java EE Hello World</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distributed Systems Management</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-    <h1>Welcome to Java EE Hello World Application</h1>
-    <p>Click <a href="hello">here</a> to see the Hello World servlet.</p>
+<body>    <div class="container">        <header>
+            <h1>Dish Order System</h1>            <nav id="main-nav" style="display: none;">
+                <ul>
+                    <li class="admin-menu-container">
+                        <div class="admin-buttons">
+                            <a href="#" class="nav-link admin-only" data-page="customer">Customer</a>
+                            <a href="#" class="nav-link admin-only" data-page="company">Company</a>
+                            <a href="#" class="nav-link admin-only" data-page="seller">Seller</a>
+                        </div>
+                    </li>
+                    <li><a href="#" class="nav-link" data-page="login" id="logout-link">Logout</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <main>            <!-- Login Page -->            <section id="login" class="page active">
+                <h2>Welcome to Dish Order System</h2>                <div class="card">
+                    <div class="auth-toggle">
+                        <button id="show-login" class="auth-btn active">Login</button>
+                        <button id="show-signup" class="auth-btn">Customer Sign Up</button>
+                    </div>
+                    
+                    <form id="login-form">
+                        <div class="form-group">
+                            <label for="login-username">Username</label>
+                            <input type="text" id="login-username" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Password</label>
+                            <input type="password" id="login-password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn">Login</button>
+                    </form>
+                    
+                    <form id="signup-form" style="display: none;">
+                        <div class="form-group">
+                            <label for="signup-username">Username</label>
+                            <input type="text" id="signup-username" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-password">Password</label>
+                            <input type="password" id="signup-password" name="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-name">Full Name</label>
+                            <input type="text" id="signup-name" name="customer_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-address">Address</label>
+                            <input type="text" id="signup-address" name="address" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-mobile">Mobile Number</label>
+                            <input type="text" id="signup-mobile" name="mobile_number">
+                        </div>
+                        <button type="submit" class="btn">Sign Up</button>
+                    </form>
+                </div>
+                <div id="login-message" class="message"></div>
+            </section>            <!-- Customer Page -->
+            <section id="customer" class="page">
+                <h2>Customer Management</h2>
+                <div class="card">
+                    <h3>Customer Dashboard</h3>
+                    <p>Welcome to the customer dashboard. Here you can view all registered customers.</p>
+                </div>
+                
+                <div class="card mt-4">
+                    <h3>All Customers</h3>
+                    <button id="load-customers" class="btn">Load Customers</button>
+                    <div class="table-container">
+                        <table id="customers-table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Name</th>
+                                    <th>Address</th>
+                                    <th>Mobile</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Customer data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>                </div>
+            </section>            <!-- Company Page -->
+            <section id="company" class="page">
+                <h2>Company Management</h2>
+                <div class="card">
+                    <h3>Create Company with Unique Names</h3>
+                    <form id="company-unique-form">
+                        <div class="form-group">
+                            <label for="unique-company-name">Company Name</label>
+                            <input type="text" id="unique-company-name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="unique-company-address">Address</label>
+                            <input type="text" id="unique-company-address" name="address" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="unique-count">Number of Unique Names</label>
+                            <input type="number" id="unique-count" name="uniqueCount" value="3" min="1" max="10" required>
+                        </div>
+                        <button type="submit" class="btn">Create Company</button>
+                    </form>
+                </div>
+            </section>
+              <!-- Seller Page -->
+            <section id="seller" class="page">
+                <h2>Seller Management</h2>
+                <div class="card">
+                    <h3>Create New Seller</h3>
+                    <form id="seller-form">
+                        <div class="form-group">
+                            <label for="seller-company">Company</label>
+                            <div class="input-group">
+                                <select id="seller-company" name="companyName" required>
+                                    <option value="">-- Select Company --</option>
+                                    <!-- Companies will be loaded here -->
+                                </select>
+                                <button type="button" id="refresh-companies" class="btn-small">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="seller-name">Seller Name</label>
+                            <input type="text" id="seller-name" name="name" required>
+                        </div>                        <div class="form-actions">
+                            <button type="submit" class="btn">Generate Seller Account</button>
+                        </div>
+                    </form>
+                    <div id="seller-result" class="result-box">
+                        <!-- Generated seller account info will appear here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 Distributed Systems Management</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

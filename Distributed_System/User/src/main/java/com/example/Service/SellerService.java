@@ -36,9 +36,8 @@ public class SellerService {
                 throw new IllegalArgumentException("Company name cannot be empty");
             }
             Seller newSeller = new Seller();
-            String username = null;
             while (true) {
-                username= companyService.generateCompanyUniqueName(CompanyName);;
+                String username= companyService.generateCompanyUniqueName(CompanyName);;
                 Seller existingSeller = entityManager.find(Seller.class,username);
                 if (existingSeller == null) {
                     newSeller.setUsername(username);
@@ -48,6 +47,8 @@ public class SellerService {
              newSeller.setCompany(company);
             newSeller.setSeller_name(seller_name);
             newSeller.setPassword(generateRandomPassword(6));
+            company.getSellers().add(newSeller);
+            entityManager.persist(company);
             entityManager.persist(newSeller);
             return newSeller; 
         } catch (Exception e) {

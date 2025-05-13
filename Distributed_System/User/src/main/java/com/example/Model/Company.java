@@ -15,6 +15,8 @@ public class Company {
     @CollectionTable(name = "company_unique_names", joinColumns = @JoinColumn(name = "company_name"))
     @Column(name = "unique_name")
     private List<String> companyUniqueNames;
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
+    private List<Seller> sellers;
     
     public String getCompanyName() {
         return companyName;
@@ -39,8 +41,13 @@ public class Company {
         this.companyAddress = companyAddress;
         this.companyUniqueNames = companyUniqueNames;
     }
-    
-    // Add a no-args constructor for JPA
+    public List<Seller> getSellers() {
+        return sellers;
+    }
+    public void addSeller(Seller seller) {
+        this.sellers.add(seller);
+    }
     public Company() {
     }
+
 }

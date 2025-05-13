@@ -18,17 +18,20 @@ const Dish = sequelize.define('Dish', {
   price: {
     type: DataTypes.FLOAT,
     allowNull: false,
-  },
-  stock: {
+  },  stock: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
-  companyId: {
-    type: DataTypes.UUID,
+  companyUsername: {
+    type: DataTypes.STRING,
     allowNull: false,
   },
+  sellerusername: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  }
 }, {
-  timestamps: true, // Enable createdAt and updatedAt fields
+  timestamps: true,
 });
 
 

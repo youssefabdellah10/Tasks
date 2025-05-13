@@ -15,17 +15,6 @@ const dbConfig = new Sequelize(DB_URI, {
         idle: 10000
     }
 });
-
-// RabbitMQ configuration
-const rabbitConfig = {
-  url: process.env.RABBITMQ_URL || 'amqp://localhost:5672',
-  exchange: 'food_delivery',
-  queues: {
-    dishOrder: 'dish.order.queue',
-    stockUpdate: 'dish.stock.queue'
-  }
-};
-
 // Server configuration
 const serverConfig = {
   port: process.env.PORT || 3001,
@@ -34,6 +23,5 @@ const serverConfig = {
 
 module.exports = {
   db: dbConfig,
-  rabbit: rabbitConfig,
   server: serverConfig
 };

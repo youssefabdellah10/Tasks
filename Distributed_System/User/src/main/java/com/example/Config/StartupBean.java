@@ -37,11 +37,11 @@ public class StartupBean {
                 LOGGER.info("Companies table is empty. Initializing with default values...");
                 
                 // Create some initial companies
-                companyService.createCompanyWithUniqueNames("goatdish", "Redmond, WA", 5);
-                companyService.createCompanyWithUniqueNames("Google", "Mountain View, CA", 3);
-                companyService.createCompanyWithUniqueNames("Amazon", "Seattle, WA", 4);
-                companyService.createCompanyWithUniqueNames("Apple", "Cupertino, CA", 5);
-                companyService.createCompanyWithUniqueNames("Facebook", "Menlo Park, CA", 3);
+                companyService.createCompanyWithUniqueNames("goatdish", "14, dokki", 5);
+                companyService.createCompanyWithUniqueNames("dishwinner", "23, nasrcity", 3);
+                companyService.createCompanyWithUniqueNames("7ad2", "20,haram ", 4);
+                companyService.createCompanyWithUniqueNames("joeel7ara2", "44, medan el mesa7a", 5);
+                companyService.createCompanyWithUniqueNames("ay7agahelwa", "19, masr el jadeda", 3);
                 
                 LOGGER.info("Companies table initialized successfully");
             } else {

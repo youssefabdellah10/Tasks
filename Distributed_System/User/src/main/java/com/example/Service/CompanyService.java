@@ -19,13 +19,7 @@ public class CompanyService {
     @PersistenceContext(unitName = "CustomerPU")
     private EntityManager entityManager;
     
-    /**
-     * Generates a single unique name for a company
-     * Format: First 3 letters of company name + 3 random digits
-     * 
-     * @param companyName The name of the company
-     * @return A unique name string
-     */
+   
     public String generateCompanyUniqueName(String companyName) {
         if (companyName == null || companyName.isEmpty()) {
             throw new IllegalArgumentException("Company name cannot be empty");
@@ -46,14 +40,7 @@ public class CompanyService {
         return prefix + suffix;
     }
     
-    /**
-     * Generates a list of unique names for a company
-     * Format: First 3 letters of company name + 3 random digits
-     * 
-     * @param companyName The name of the company
-     * @param count The number of unique names to generate
-     * @return List of unique names
-     */
+   
     public List<String> generateCompanyUniqueNames(String companyName, int count) {
         if (companyName == null || companyName.isEmpty()) {
             throw new IllegalArgumentException("Company name cannot be empty");
@@ -74,12 +61,7 @@ public class CompanyService {
         return uniqueNames;
     }
     
-    /**
-     * Saves a company to the database
-     * 
-     * @param company The company to save
-     * @return true if successful, false otherwise
-     */
+  
     public boolean saveCompany(Company company) {
         try {
             String companyName = company.getCompanyName();
@@ -97,14 +79,7 @@ public class CompanyService {
         }
     }
     
-    /**
-     * Creates a company with generated unique names
-     * 
-     * @param companyName The name of the company
-     * @param companyAddress The address of the company
-     * @param uniqueNameCount The number of unique names to generate
-     * @return The created company or null if creation failed
-     */
+    
     public Company createCompanyWithUniqueNames(String companyName, String companyAddress, int uniqueNameCount) {
         try {
             List<String> uniqueNames = generateCompanyUniqueNames(companyName, uniqueNameCount);
@@ -121,11 +96,7 @@ public class CompanyService {
         }
     }
     
-    /**
-     * Checks if any companies exist in the database
-     * 
-     * @return true if at least one company exists, false otherwise
-     */
+    
     public boolean hasCompanies() {
         try {
             TypedQuery<Long> query = entityManager.createQuery(
@@ -138,11 +109,7 @@ public class CompanyService {
         }
     }
     
-    /**
-     * Gets all companies from the database
-     * 
-     * @return List of all companies
-     */
+   
     public List<Company> getAllCompanies() {
         try {
             TypedQuery<Company> query = entityManager.createQuery(

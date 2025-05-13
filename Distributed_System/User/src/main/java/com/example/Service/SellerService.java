@@ -16,11 +16,6 @@ public class SellerService {
     @Inject
     private CompanyService companyService;
     
-    /**
-     * Generates a random password with mixed characters and numbers
-     * @param length The length of the password
-     * @return A random password
-     */
     public String generateRandomPassword(int length) {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         StringBuilder password = new StringBuilder();

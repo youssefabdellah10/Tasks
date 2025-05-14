@@ -1,24 +1,18 @@
 package com.example.Service;
 import com.example.Model.Customer;
+import com.example.Repositories.CustomerRepo;
 
 import jakarta.ejb.Stateless;
-import jakarta.persistence.*;
+import jakarta.inject.Inject;
 import java.util.List;
 
 @Stateless
 public class CustomerSerivce {
-    @PersistenceContext(unitName = "CustomerPU")
-    private EntityManager entityManager;
-    
-    public boolean saveCustomer(Customer customer) {
+    @Inject
+    private CustomerRepo customerRepo;
+      public boolean saveCustomer(Customer customer) {
         try {
-            String username = customer.getUsername();
-            Customer existingCustomer = entityManager.find(Customer.class, username);
-            if (existingCustomer != null) {
-                return false; // User with the same username already exists
-            }
-            entityManager.persist(customer);
-            return true; // User saved successfully
+            return customerRepo.saveCustomer(customer);
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -27,11 +21,37 @@ public class CustomerSerivce {
     
     public List<Customer> getAllCustomers() {
         try {
-            return entityManager.createQuery("SELECT c FROM Customer c", Customer.class)
-                    .getResultList();
+            return customerRepo.getAllCustomers();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+    
+    public Customer findCustomerByUsername(String username) {
+        try {
+            return customerRepo.findCustomerByUsername(username);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    public boolean updateCustomer(Customer customer) {
+        try {
+            return customerRepo.updateCustomer(customer);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    public boolean deleteCustomer(String username) {
+        try {
+            return customerRepo.deleteCustomer(username);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
    

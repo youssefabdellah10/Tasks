@@ -3,17 +3,18 @@ package com.example.Service;
 import com.example.Model.Admin;
 import com.example.Model.Customer;
 import com.example.Model.Seller;
+import com.example.Repositories.UserRepo;
 
 import jakarta.ejb.Stateless;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 
 @Stateless
 public class UserService {
-    @PersistenceContext(unitName = "CustomerPU")
-    private EntityManager entityManager;
+    
+    @Inject
+    private UserRepo userRepo;
     
     public static final String ROLE_CUSTOMER = "CUSTOMER";
     public static final String ROLE_ADMIN = "ADMIN";
@@ -21,9 +22,9 @@ public class UserService {
 
     public Map<String, String> authenticate(String username, String password) {
         try {
-            Customer customer = entityManager.find(Customer.class, username);
-            Admin admin = entityManager.find(Admin.class, username);
-            Seller seller = entityManager.find(Seller.class, username);
+            Customer customer = userRepo.findCustomerbyusername(username);
+            Admin admin = userRepo.findAdminbyusername(username);
+            Seller seller = userRepo.findSellerbyusername(username);
             
             Map<String, String> result = new HashMap<>();
             
@@ -60,9 +61,9 @@ public class UserService {
     
     public Map<String, String> getUserInfo(String username) {
         try {
-            Customer customer = entityManager.find(Customer.class, username);
-            Admin admin = entityManager.find(Admin.class, username);
-            Seller seller = entityManager.find(Seller.class, username);
+            Customer customer = userRepo.findCustomerbyusername(username);
+            Admin admin = userRepo.findAdminbyusername(username);
+            Seller seller = userRepo.findSellerbyusername(username);
             
             Map<String, String> result = new HashMap<>();
             

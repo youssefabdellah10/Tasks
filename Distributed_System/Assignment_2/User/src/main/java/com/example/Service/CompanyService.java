@@ -25,16 +25,13 @@ public class CompanyService {
             throw new IllegalArgumentException("Company name cannot be empty");
         }
         
-        // Get first 3 characters of company name, or fewer if name is shorter
         String prefix = companyName.length() >= 3 ? 
                 companyName.substring(0, 3).toUpperCase() : 
                 companyName.toUpperCase();
         
         Random random = new Random();
         
-        // Generate 3 random digits
         int randomNum = random.nextInt(1000);
-        // Format to ensure 3 digits with leading zeros if needed
         String suffix = String.format("%03d", randomNum);
         
         return prefix + suffix;
@@ -47,12 +44,11 @@ public class CompanyService {
         }
         
         List<String> uniqueNames = new ArrayList<>();
-        Set<String> nameSet = new HashSet<>(); // To ensure uniqueness
+        Set<String> nameSet = new HashSet<>(); 
         
         while (nameSet.size() < count) {
             String uniqueName = generateCompanyUniqueName(companyName);
             
-            // Only add if this exact name hasn't been generated yet
             if (nameSet.add(uniqueName)) {
                 uniqueNames.add(uniqueName);
             }
@@ -68,7 +64,7 @@ public class CompanyService {
             Company existingCompany = entityManager.find(Company.class, companyName);
             
             if (existingCompany != null) {
-                return false; // Company with the same name already exists
+                return false;
             }
             
             entityManager.persist(company);
@@ -109,8 +105,7 @@ public class CompanyService {
         }
     }
     
-   
-    public List<Company> getAllCompanies() {
+     public List<Company> getAllCompanies() {
         try {
             TypedQuery<Company> query = entityManager.createQuery(
                 "SELECT c FROM Company c", Company.class);
@@ -118,6 +113,15 @@ public class CompanyService {
         } catch (Exception e) {
             e.printStackTrace();
             return new ArrayList<>();
+        }
+    }
+    
+    public Company getCompanyByName(String companyName) {
+        try {
+            return entityManager.find(Company.class, companyName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }

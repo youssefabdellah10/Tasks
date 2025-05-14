@@ -2,17 +2,17 @@ package com.example.Service;
 
 import com.example.Model.Company;
 import com.example.Model.Seller;
+import com.example.Repositories.SellerRepo;
 
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import java.util.Random;
 
 @Stateless
 public class SellerService {
-    @PersistenceContext(unitName = "CustomerPU")
-    private EntityManager entityManager;
+    @Inject
+    private SellerRepo sellerRepo;
+    
     @Inject
     private CompanyService companyService;
     
@@ -28,28 +28,36 @@ public class SellerService {
         
         return password.toString();
     }
-    
-    public Seller generateSellerAccount(String CompanyName,String seller_name) {
-        Company company = entityManager.find(Company.class, CompanyName);
+      public Seller generateSellerAccount(String CompanyName, String seller_name) {
         try {
+            // Get the company via the CompanyService instead of direct entity manager access
+            Company company = companyService.getCompanyByName(CompanyName);
+            
             if(CompanyName == null || CompanyName.isEmpty() || company == null) {
-                throw new IllegalArgumentException("Company name cannot be empty");
+                throw new IllegalArgumentException("Company name cannot be empty or company does not exist");
             }
+            
             Seller newSeller = new Seller();
+            
+            // Generate a unique username
             while (true) {
-                String username= companyService.generateCompanyUniqueName(CompanyName);;
-                Seller existingSeller = entityManager.find(Seller.class,username);
-                if (existingSeller == null) {
+                String username = companyService.generateCompanyUniqueName(CompanyName);
+                // Use sellerRepo to check if username exists
+                if (!sellerRepo.usernameExists(username)) {
                     newSeller.setUsername(username);
                     break;
                 }
             }
-             newSeller.setCompany(company);
+            
+            newSeller.setCompany(company);
             newSeller.setSeller_name(seller_name);
             newSeller.setPassword(generateRandomPassword(6));
+            
             company.getSellers().add(newSeller);
-            entityManager.persist(company);
-            entityManager.persist(newSeller);
+            
+            // Use SellerRepo to persist
+            sellerRepo.persistSeller(newSeller);
+            
             return newSeller; 
         } catch (Exception e) {
             e.printStackTrace();

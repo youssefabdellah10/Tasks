@@ -10,10 +10,11 @@
     <packaging>war</packaging>
     
     <name>Java EE Hello World</name>
-    <description>A simple Java EE Hello World application for WildFly 26</description>    <properties>
+    <description>A simple Java EE Hello World application for WildFly 26</description>
+      <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <jakartaee.version>10.0.0</jakartaee.version>
     </properties>
     
@@ -80,14 +81,15 @@
     </dependencies>
       <build>
         <finalName>users</finalName>
-        <plugins>            <plugin>
+        <plugins>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>                
+                <version>3.10.1</version>
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
-                    <!-- Removing the release flag as it's causing issues with older Maven/Java -->
+                    <release>11</release>
                 </configuration>
             </plugin>
             <plugin>
@@ -108,7 +110,7 @@
                     <username>admin</username>
                     <password>admin</password>
                     <javaOpts>-Djboss.http.port=7000</javaOpts>
-                    <jbossHome>C:\Users\youss\Downloads\wildfly-36.0.0.Final</jbossHome>
+                    <jbossHome>../wildfly-36.0.0.Final</jbossHome>
                 </configuration>
             </plugin>
         </plugins>

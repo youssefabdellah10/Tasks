@@ -37,7 +37,7 @@ public class CustomerController {
                     .build();
         }
     } 
-      @GET
+    @GET
     @Path("/all")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllCustomers() {

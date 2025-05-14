@@ -39,7 +39,7 @@ const extractUserFromToken = (req) => {
   }
 };
 
-exports.getAllDishes = async(req, res) => {
+exports.getAllDishes = async(req,res) => {
   try {
     const dishes = await Dish.findAll();
     res.status(200).json({message: 'All dishes retrieved successfully', dishes });

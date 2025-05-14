@@ -1,43 +1,5 @@
 const Dish = require('../models/dish.model');
-const jwt = require('jsonwebtoken');
 
-const extractUserFromToken = (req) => {
-  try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return { error: 'No token provided or invalid format. Please provide a Bearer token.' };
-    }
-    
-    const token = authHeader.split(' ')[1];
-    if (!token) {
-      return { error: 'No token provided' };
-    }
-    
-    // Use the environment variable with a fallback
-    const JWT_SECRET = process.env.JWT_SECRET ;
-    
-    // Verify the token
-    const decoded = jwt.verify(token, JWT_SECRET);
-    console.log('Token payload:', decoded);
-    
-    // Handle different possible field names that might come from another microservice
-    const sellerusername = decoded.sub ;
-    const companyUsername = decoded.companyUsername ;
-    
-    if (!sellerusername || !companyUsername) {
-      console.log(sellerusername, companyUsername);
-      return { error: 'Token is missing required user information' };
-    }
-    
-    return { 
-      sellerusername,
-      companyUsername
-    };
-  } catch (error) {
-    console.error('Token verification error:', error.message);
-    return { error: `Invalid token: ${error.message}` };
-  }
-};
 
 exports.getAllDishes = async(req, res) => {
   try {
@@ -98,13 +60,7 @@ exports.createDish = async(req, res) => {
     return res.status(400).json({message: 'Name, price, stock, and description are required'});
   }
   
-  // Extract user info from token
-  const userInfo = extractUserFromToken(req);
-  if (userInfo.error) {
-    return res.status(403).json({message: userInfo.error});
-  }
-    const { sellerusername, companyUsername } = userInfo;
-  
+  const { sellerusername, companyUsername } = req.user;
   if (!sellerusername || !companyUsername) {
     return res.status(403).json({message: 'Authentication required to create dishes'});
   }
@@ -134,19 +90,12 @@ exports.updateDish = async(req, res) => {
     return res.status(400).json({message: 'Dish ID is required'});
   }
   
-  // Extract user info from token
-  const userInfo = extractUserFromToken(req);
-  if (userInfo.error) {
-    return res.status(403).json({message: userInfo.error});
-  }
-    const { sellerusername, companyUsername } = userInfo;
-  
-  if (!sellerusername || !companyUsername) {
+  const {companyUsername, sellerusername} = req.user;
+  if (!companyUsername || !sellerusername) {
     return res.status(403).json({message: 'Authentication required to update dishes'});
   }
   
   try {
-    // Check if the dish exists and belongs to the company
     const dish = await Dish.findByPk(id);
     
     if (!dish) {
@@ -156,8 +105,6 @@ exports.updateDish = async(req, res) => {
     if (dish.companyUsername !== companyUsername) {
       return res.status(403).json({message: 'You can only update dishes from your own company'});
     }
-    
-    // Update the dish
     const [updated] = await Dish.update(
       { name, description, price, stock },
       { where: { id } }
@@ -175,7 +122,6 @@ exports.updateDish = async(req, res) => {
   }
 };
 
-// Check dish stock
 exports.checkDishStock = async(req, res) => {
   const { items } = req.body;
 
@@ -184,7 +130,6 @@ exports.checkDishStock = async(req, res) => {
   }
   
   try {
-    // Check stock for each item
     const stockResults = [];
     let allAvailable = true;
     
@@ -233,6 +178,24 @@ exports.checkDishStock = async(req, res) => {
   } catch (error) {
     console.error('Error checking stock:', error);
     return res.status(500).json({message: 'Error checking stock', error: error.message });
+  }
+};
+
+
+exports.viewMyDishes = async(req, res) => {
+  const { sellerusername, companyUsername } = req.user;
+  
+  try {
+    const dishes = await Dish.findAll({ where: { sellerusername } });
+    
+    if (dishes.length === 0) {
+      return res.status(404).json({message: 'No dishes found for this seller'});
+    }
+    
+    res.status(200).json({message: 'Your dishes retrieved successfully', dishes });
+  } catch (error) {
+    console.error('Error retrieving your dishes:', error);
+    res.status(500).json({message: 'Error retrieving your dishes', error: error.message });
   }
 };
 

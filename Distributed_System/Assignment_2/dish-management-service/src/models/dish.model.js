@@ -3,8 +3,8 @@ const { DataTypes } = require('sequelize');
 const sequelize = dbConfig.db;
 const Dish = sequelize.define('Dish', {
   id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
     primaryKey: true,
   },
   name: {

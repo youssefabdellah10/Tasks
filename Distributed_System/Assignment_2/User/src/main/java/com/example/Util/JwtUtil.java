@@ -7,18 +7,18 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.security.Key;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import javax.crypto.spec.SecretKeySpec;
 
 @ApplicationScoped
 public class JwtUtil {
     
     private Key key;
-    // This secret key should be the same across all microservices
     private static final String SECRET_KEY = "DistributedSystemAssignment2SecretKey";
+    private static final long EXPIRATION_TIME = 3600000; 
     
     @PostConstruct
     public void init() {
-        // Use a fixed secret key instead of generating a new one each time
         key = new SecretKeySpec(SECRET_KEY.getBytes(StandardCharsets.UTF_8), 
                                SignatureAlgorithm.HS256.getJcaName());
     }
@@ -26,10 +26,15 @@ public class JwtUtil {
     public String generateToken(String username, String role) {
         return generateToken(username, role, null);
     }
-    
-    public String generateToken(String username, String role, String companyUsername) {
+      public String generateToken(String username, String role, String companyUsername) {
+        // Calculate expiration time
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + EXPIRATION_TIME);
+        
         var builder = Jwts.builder()
                 .setSubject(username)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
                 .claim("role", role);
                 
         if (companyUsername != null) {

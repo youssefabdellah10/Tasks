@@ -10,11 +10,10 @@
     <packaging>war</packaging>
     
     <name>Java EE Hello World</name>
-    <description>A simple Java EE Hello World application for WildFly 26</description>
-      <properties>
+    <description>A simple Java EE Hello World application for WildFly 26</description>    <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <jakartaee.version>10.0.0</jakartaee.version>
     </properties>
     
@@ -59,18 +58,36 @@
             <artifactId>hibernate-c3p0</artifactId>
             <version>5.6.15.Final</version>
         </dependency>
+        
+        <!-- JWT Dependencies -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
       <build>
         <finalName>users</finalName>
-        <plugins>
-            <plugin>
+        <plugins>            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
+                <version>3.10.1</version>                
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
-                    <release>11</release>
+                    <!-- Removing the release flag as it's causing issues with older Maven/Java -->
                 </configuration>
             </plugin>
             <plugin>
@@ -91,7 +108,7 @@
                     <username>admin</username>
                     <password>admin</password>
                     <javaOpts>-Djboss.http.port=7000</javaOpts>
-                    <jbossHome>../wildfly-36.0.0.Final</jbossHome>
+                    <jbossHome>C:\Users\youss\Downloads\wildfly-36.0.0.Final</jbossHome>
                 </configuration>
             </plugin>
         </plugins>

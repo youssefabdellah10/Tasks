@@ -21,22 +21,15 @@ const MainNavbar = () => {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            <Nav.Link as={Link} to="/">Home</Nav.Link>
-            
             {/* Admin Navigation Links */}
             {currentUser && currentUser.userType === 'admin' && (
               <>
                 <Nav.Link as={Link} to="/admin/dashboard">Dashboard</Nav.Link>
-                <Nav.Link as={Link} to="/admin/companies">Companies</Nav.Link>
-                <Nav.Link as={Link} to="/admin/users">Users</Nav.Link>
-              </>
-            )}
-
-            {/* Company Navigation Links */}
-            {currentUser && currentUser.userType === 'company' && (
-              <>
-                <Nav.Link as={Link} to="/company/dashboard">Dashboard</Nav.Link>
-                <Nav.Link as={Link} to="/company/sellers">Manage Sellers</Nav.Link>
+                <NavDropdown title="Management" id="admin-management-dropdown">
+                  <NavDropdown.Item as={Link} to="/admin/users">Users</NavDropdown.Item>
+                </NavDropdown>
+                <Nav.Link as={Link} to="/admin/reports">Reports</Nav.Link>
+                <Nav.Link as={Link} to="/admin/settings">Settings</Nav.Link>
               </>
             )}
 

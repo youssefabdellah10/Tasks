@@ -28,9 +28,6 @@ const Login = () => {
         case 'admin':
           navigate('/admin/dashboard');
           break;
-        case 'company':
-          navigate('/company/dashboard');
-          break;
         case 'seller':
           navigate('/seller/dashboard');
           break;
@@ -64,7 +61,6 @@ const Login = () => {
                 >
                   <option value="customer">Customer</option>
                   <option value="seller">Seller</option>
-                  <option value="company">Company</option>
                   <option value="admin">Admin</option>
                 </Form.Select>
               </Form.Group>

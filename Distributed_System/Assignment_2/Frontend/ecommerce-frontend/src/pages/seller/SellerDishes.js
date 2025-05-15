@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Table, Button, Modal, Form, Row, Col, Alert } from 'react-bootstrap';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
+import { Table, Button, Modal, Form, Alert } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash, faPlus } from '@fortawesome/free-solid-svg-icons';
 import DishService from '../../services/dish.service';
@@ -12,6 +12,10 @@ const SellerDishes = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
+  // Store userId in a ref to prevent unnecessary re-renders
+  const userIdRef = React.useRef(currentUser?.userId);
+  const requestInProgressRef = React.useRef(false);
+  
   // Modal state
   const [showModal, setShowModal] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
@@ -21,24 +25,54 @@ const SellerDishes = () => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
+  const [stock, setStock] = useState('100');
   const [image, setImage] = useState('');
   const [formError, setFormError] = useState('');
   
-  useEffect(() => {
-    fetchDishes();
-  }, []);
-  
-  const fetchDishes = async () => {
+  // Extract fetchDishes as a separate named function with useCallback
+  const fetchDishes = useCallback(async () => {
+    if (!currentUser?.userId || requestInProgressRef.current) {
+      console.log("Skipping fetch - no userId or request in progress");
+      return;
+    }
+    
     try {
+      console.log("Fetching dishes for user:", currentUser.userId);
+      requestInProgressRef.current = true;
       setLoading(true);
-      const response = await DishService.getSellerDishes(currentUser.userId);
-      setDishes(response);
+      
+      const response = await DishService.getSellerDishes();
+      console.log("Dishes response:", response);
+      
+      setDishes(response || []);
       setLoading(false);
     } catch (err) {
+      console.error("Error fetching dishes:", err);
       setError('Failed to fetch dishes. Please try again later.');
       setLoading(false);
+    } finally {
+      requestInProgressRef.current = false;
     }
-  };
+  }, [currentUser?.userId]);
+  
+  // Effect to monitor user changes 
+  useEffect(() => {
+    // Only fetch if user ID has actually changed from what we've already fetched
+    if (currentUser?.userId && currentUser.userId !== userIdRef.current) {
+      // Update ref with current userId
+      userIdRef.current = currentUser.userId;
+      fetchDishes();
+    }
+  }, [currentUser, fetchDishes]);
+  
+  // Initial load effect - always fetch on component mount
+  useEffect(() => {
+    console.log("Component mounted, currentUser:", currentUser);
+    if (currentUser?.userId) {
+      fetchDishes();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   const openAddModal = () => {
     setModalTitle('Add New Dish');
@@ -54,6 +88,7 @@ const SellerDishes = () => {
     setName(dish.name);
     setDescription(dish.description);
     setPrice(dish.price.toString());
+    setStock(dish.stock ? dish.stock.toString() : '100');
     setImage(dish.image || '');
     setShowModal(true);
   };
@@ -62,6 +97,7 @@ const SellerDishes = () => {
     setName('');
     setDescription('');
     setPrice('');
+    setStock('100');
     setImage('');
     setFormError('');
   };
@@ -75,10 +111,16 @@ const SellerDishes = () => {
     if (!name.trim()) return 'Name is required';
     if (!description.trim()) return 'Description is required';
     if (!price) return 'Price is required';
+    if (!stock) return 'Stock quantity is required';
     
     const priceValue = parseFloat(price);
     if (isNaN(priceValue) || priceValue <= 0) {
       return 'Price must be a positive number';
+    }
+    
+    const stockValue = parseInt(stock, 10);
+    if (isNaN(stockValue) || stockValue <= 0) {
+      return 'Stock must be a positive number';
     }
     
     return null;
@@ -96,6 +138,7 @@ const SellerDishes = () => {
         name,
         description,
         price: parseFloat(price),
+        stock: parseInt(stock, 10),
         image,
         sellerId: currentUser.userId,
         companyId: currentUser.companyId
@@ -110,6 +153,7 @@ const SellerDishes = () => {
       }
       
       handleClose();
+      // Refresh dishes list
       fetchDishes();
     } catch (err) {
       setFormError(err.response?.data?.message || 'Failed to save dish');
@@ -120,6 +164,7 @@ const SellerDishes = () => {
     if (window.confirm('Are you sure you want to delete this dish?')) {
       try {
         await DishService.deleteDish(dishId);
+        // Refresh dishes list
         fetchDishes();
       } catch (err) {
         setError('Failed to delete dish');
@@ -163,6 +208,7 @@ const SellerDishes = () => {
               <th>Name</th>
               <th>Description</th>
               <th>Price</th>
+              <th>Stock</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -177,6 +223,7 @@ const SellerDishes = () => {
                     : dish.description}
                 </td>
                 <td>${dish.price.toFixed(2)}</td>
+                <td>{dish.stock || 'N/A'}</td>
                 <td>
                   <Button
                     variant="outline-primary"
@@ -241,6 +288,18 @@ const SellerDishes = () => {
                 placeholder="Enter price"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
+                required
+              />
+            </Form.Group>
+            
+            <Form.Group className="mb-3" controlId="dishStock">
+              <Form.Label>Stock Quantity</Form.Label>
+              <Form.Control
+                type="number"
+                min="1"
+                placeholder="Enter available stock quantity"
+                value={stock}
+                onChange={(e) => setStock(e.target.value)}
                 required
               />
             </Form.Group>

@@ -19,12 +19,13 @@ import SellerOrderManagement from './pages/seller/OrderManagement';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/Dashboard';
-import CompanyManagement from './pages/admin/CompanyManagement';
 import UserManagement from './pages/admin/UserManagement';
+import Reports from './pages/admin/Reports';
+import SystemSettings from './pages/admin/SystemSettings';
+import AdminActivityLogs from './pages/admin/AdminActivityLogs';
 
-// Company Pages
-import CompanyDashboard from './pages/company/Dashboard';
-import SellerManagement from './pages/company/SellerManagement';
+// Common Pages
+import UserProfile from './pages/common/UserProfile';
 
 // Common CSS
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -110,15 +111,6 @@ function App() {
               } 
             />
             <Route 
-              path="/admin/companies" 
-              element={
-                <PrivateRoute 
-                  component={CompanyManagement} 
-                  requiredUserType={['admin']} 
-                />
-              } 
-            />
-            <Route 
               path="/admin/users" 
               element={
                 <PrivateRoute 
@@ -127,39 +119,46 @@ function App() {
                 />
               } 
             />
+            <Route 
+              path="/admin/reports" 
+              element={
+                <PrivateRoute 
+                  component={Reports} 
+                  requiredUserType={['admin']} 
+                />
+              } 
+            />
+            <Route 
+              path="/admin/settings" 
+              element={
+                <PrivateRoute 
+                  component={SystemSettings} 
+                  requiredUserType={['admin']} 
+                />
+              } 
+            />
+            <Route 
+              path="/admin/activity-logs" 
+              element={
+                <PrivateRoute 
+                  component={AdminActivityLogs} 
+                  requiredUserType={['admin']} 
+                />
+              } 
+            />
             
-            {/* Company Routes */}
-            <Route 
-              path="/company/dashboard" 
-              element={
-                <PrivateRoute 
-                  component={CompanyDashboard} 
-                  requiredUserType={['company']} 
-                />
-              } 
-            />
-            <Route 
-              path="/company/sellers" 
-              element={
-                <PrivateRoute 
-                  component={SellerManagement} 
-                  requiredUserType={['company']} 
-                />
-              } 
-            />
+            {/* No Company Routes - Removed */}
             
             {/* Profile Route - accessible by all user types */}
-            {/* Commented out due to missing UserProfile component
             <Route 
               path="/profile" 
               element={
                 <PrivateRoute 
                   component={UserProfile} 
-                  requiredUserType={['admin', 'company', 'seller', 'customer']} 
+                  requiredUserType={['admin', 'seller', 'customer']} 
                 />
               } 
             />
-            */}
             
             {/* Default Routes */}
             <Route path="/" element={<DefaultRedirect />} />
@@ -181,8 +180,6 @@ const DefaultRedirect = () => {
   switch (currentUser.userType) {
     case 'admin':
       return <Navigate to="/admin/dashboard" replace />;
-    case 'company':
-      return <Navigate to="/company/dashboard" replace />;
     case 'seller':
       return <Navigate to="/seller/dashboard" replace />;
     case 'customer':

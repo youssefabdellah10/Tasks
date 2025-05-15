@@ -10,6 +10,16 @@ const AdminService = {
       throw error;
     }
   },
+  
+  // Create multiple company representative accounts with auto-generated passwords
+  createCompanyRepresentatives: async (companyNames) => {
+    try {
+      const response = await userApi.post('/admin/companies/representatives/batch', { companyNames });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
 
   // Get company by ID
   getCompanyById: async (companyId) => {
@@ -75,6 +85,56 @@ const AdminService = {
   updateUserStatus: async (userId, isActive) => {
     try {
       const response = await userApi.put(`/admin/users/${userId}/status`, { isActive });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  // Get company representatives accounts
+  getCompanyRepresentatives: async () => {
+    try {
+      const response = await userApi.get('/admin/companies/representatives');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  // Get reports data
+  getReports: async (reportType) => {
+    try {
+      const response = await userApi.get(`/admin/reports/${reportType}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  // Get system settings
+  getSystemSettings: async () => {
+    try {
+      const response = await userApi.get('/admin/settings');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  // Update system settings
+  updateSystemSettings: async (settings) => {
+    try {
+      const response = await userApi.put('/admin/settings', settings);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  // Get admin activity logs
+  getActivityLogs: async (page = 1, limit = 20) => {
+    try {
+      const response = await userApi.get(`/admin/activity-logs?page=${page}&limit=${limit}`);
       return response.data;
     } catch (error) {
       throw error;

@@ -38,7 +38,10 @@ const addAuthToken = (api) => {
     (config) => {
       const token = localStorage.getItem('token');
       if (token) {
+        console.log(`Adding token to ${config.url}`);
         config.headers['Authorization'] = `Bearer ${token}`;
+      } else {
+        console.warn(`No token available for request to ${config.url}`);
       }
       return config;
     },
@@ -89,7 +92,6 @@ const addAuthToken = (api) => {
   return api;
 };
 
-// Add auth token to all API instances
 addAuthToken(userApi);
 addAuthToken(dishApi);
 addAuthToken(orderApi);

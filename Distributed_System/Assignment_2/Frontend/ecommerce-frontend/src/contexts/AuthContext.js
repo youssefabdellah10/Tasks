@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import AuthService from '../services/auth.service';
+import tokenUtils from '../utils/tokenUtils';
 
 export const AuthContext = createContext();
 
@@ -7,31 +8,48 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
 
-  // Check logged in status and refresh token if needed
+  // Check logged in status once during initialization
   useEffect(() => {
+    if (authChecked) return;
+    
     const checkLoggedIn = () => {
+      console.log("Checking if user is logged in...");
       const user = AuthService.getCurrentUser();
+      console.log("User from localStorage:", user);
+      
+      // Debug the token if it exists
       if (user && user.token) {
+        console.log("Token found in localStorage");
+        const decodedToken = tokenUtils.getCurrentDecodedToken();
+        console.log("Token payload:", decodedToken);
+        console.log("Token expired:", tokenUtils.isTokenExpired());
+        
+        // Check if the token has the required fields
+        if (decodedToken) {
+          const hasUserIdentifier = !!(decodedToken.sub || decodedToken.username || decodedToken.userId);
+          console.log("Token has user identifier:", hasUserIdentifier);
+          
+          if (user.userType === 'seller') {
+            const hasCompanyInfo = !!(decodedToken.companyUsername || decodedToken.companyId);
+            console.log("Token has company info:", hasCompanyInfo);
+          }
+        }
+        
+        console.log("Setting current user from localStorage");
         setCurrentUser(user);
       } else {
+        console.log("No valid user found, logging out");
         // Clean up any partial auth state
         AuthService.logout();
       }
       setIsLoading(false);
+      setAuthChecked(true);
     };
     
     checkLoggedIn();
-    
-    // Set up a timer to periodically check auth status
-    const authCheckInterval = setInterval(() => {
-      if (AuthService.isAuthenticated()) {
-        checkLoggedIn();
-      }
-    }, 5000); // Check every 5 seconds
-    
-    return () => clearInterval(authCheckInterval);
-  }, []);
+  }, [authChecked]);
 
   const login = async (username, password, userType) => {
     try {
@@ -41,8 +59,7 @@ export const AuthProvider = ({ children }) => {
       setCurrentUser({
         token: user.token,
         userType: user.role.toLowerCase(),
-        userId: user.username,
-        companyId: user.companyUsername || null
+        userId: user.username
       });
       setIsLoading(false);
       return user;

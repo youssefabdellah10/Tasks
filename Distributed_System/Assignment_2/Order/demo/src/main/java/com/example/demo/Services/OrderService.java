@@ -1,7 +1,10 @@
 package com.example.demo.Services;
 
 import com.example.demo.Models.Order;
+import com.example.demo.Models.Payment;
 import com.example.demo.Repositories.OrderRepository;
+import com.example.demo.Repositories.PaymentRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,16 +21,18 @@ import java.nio.charset.StandardCharsets;
 @Service
 public class OrderService {
 
-    private final OrderRepository orderRepository;    
+    private final OrderRepository orderRepository; 
+    private final PaymentRepository paymentRepository;   
    
     @Value("${jwt.secret}")
     private String secretKey;
 
     @Autowired
-    public OrderService(OrderRepository orderRepository
+    public OrderService(OrderRepository orderRepository,
                        
-                        ) {
+                     PaymentRepository paymentRepository) {
         this.orderRepository = orderRepository;
+        this.paymentRepository = paymentRepository;
     }
    
   
@@ -130,6 +135,12 @@ public class OrderService {
         for(int dishId : dishIds) {
             order.addDish(dishId);
         }
+        if(paymentRepository.findPaymentByCustomerUsername(username) == null) {
+            Payment payment = new Payment();
+            payment.setCustomerUsername(username);
+            paymentRepository.save(payment);
+        }
         orderRepository.save(order);
     }
+
 }

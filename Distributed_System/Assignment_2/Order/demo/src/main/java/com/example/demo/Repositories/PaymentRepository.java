@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 @Singleton
 public interface PaymentRepository extends JpaRepository<Payment, String> {
+    Payment findPaymentByCustomerUsername(String customerUsername);
 }

@@ -18,6 +18,8 @@ public class Payment {
     private double balance;
     public Payment(){
         this.paymentStatus = false;
+        this.type="cash";
+        this.balance=1000.0;
     }
     public void setpaymentstatus(boolean paymentStatus) {
         this.paymentStatus = paymentStatus;

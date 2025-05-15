@@ -16,7 +16,8 @@ import java.util.List;
 public class CompanyController {
     
     @Inject
-    CompanyService companyService;    @GET
+    CompanyService companyService;
+    @GET
     @Path("/all")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllCompanies() {
@@ -43,30 +44,8 @@ public class CompanyController {
                     .build();
         }
     }
-    
     @POST
     @Path("/create")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response createCompany(Company company) {
-        try {
-            boolean isCreated = companyService.saveCompany(company);
-            if (!isCreated) {
-                return Response.status(Response.Status.CONFLICT)
-                        .entity("Company with name " + company.getCompanyName() + " already exists.")
-                        .build();
-            }
-            return Response.status(Response.Status.CREATED)
-                    .entity("Company created successfully")
-                    .build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error creating company: " + e.getMessage())
-                    .build();
-        }
-    }
-      @POST
-    @Path("/create-with-names")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createCompanyWithUniqueNames(
             @QueryParam("name") String companyName,
@@ -79,8 +58,6 @@ public class CompanyController {
                         .entity("Failed to create company. Company may already exist.")
                         .build();
             }
-            
-            // Create a simple map with only the needed information to avoid serialization issues
             java.util.Map<String, Object> resultMap = new java.util.HashMap<>();
             resultMap.put("companyName", company.getCompanyName());
             resultMap.put("companyAddress", company.getCompanyAddress());

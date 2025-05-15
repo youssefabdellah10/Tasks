@@ -118,5 +118,18 @@ public class OrderService {
         }
         return orderRepository.findAll();
     }
-    
+
+    public void createdOrder(List<Integer> dishIds, String token) {
+        String role = extractRoleFromToken(token);
+        if(role == null || !role.equals("CUSTOMER")) {
+            throw new RuntimeException("Unauthorized access: Invalid role");
+        }
+        String username = extractUsernameFromToken(token);
+        Order order = new Order();
+        order.setCustomerUsername(username);
+        for(int dishId : dishIds) {
+            order.addDish(dishId);
+        }
+        orderRepository.save(order);
+    }
 }

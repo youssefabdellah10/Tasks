@@ -12,7 +12,7 @@ public class Order {
     @ElementCollection
     @CollectionTable(name = "order_dish_ids", joinColumns = @JoinColumn(name = "order_id"))
     @Column(name = "dish_id")
-    private List<String> dishIds;
+    private List<Integer> dishIds;
     
     @Column(name = "customer_username", nullable = false)
     private String customerUsername;
@@ -35,10 +35,10 @@ public class Order {
     
     public String getOrderId() {
         return orderId;
-    }    public List<String> getDishIds() {
+    }    public List<Integer> getDishIds() {
         return dishIds;
     }
-    public void addDish(String dishId) {
+    public void addDish(int dishId) {
         this.dishIds.add(dishId);
     }public String getCustomerUsername() {
         return customerUsername;

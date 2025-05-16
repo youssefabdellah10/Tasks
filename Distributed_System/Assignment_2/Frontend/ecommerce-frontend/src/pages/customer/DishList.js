@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Card, Row, Col, Button, Form, InputGroup, Badge } from 'react-bootstrap';
+import { Card, Row, Col, Form, InputGroup, Badge } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import DishService from '../../services/dish.service';
@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 
 const DishList = () => {
   const [dishes, setDishes] = useState([]);
+  const [allDishes, setAllDishes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,42 +25,50 @@ const DishList = () => {
     }
   }, [currentUser, navigate]);
   
+  // Load all dishes once
   useEffect(() => {
-    const fetchDishes = async () => {
+    const fetchAllDishes = async () => {
       try {
         setLoading(true);
-        let response;
-        
-        if (searchTerm) {
-          // If there's a search term, use search functionality
-          response = await DishService.searchDishes(searchTerm);
-        } else if (currentUser && currentUser.companyId) {
-          // If user belongs to a company, show company dishes
-          response = await DishService.getCompanyDishes(currentUser.companyId);
-        } else {
-          // Otherwise, get all dishes
-          response = await DishService.getAllDishes();
-        }
-        
+        const response = await DishService.getAllDishes();
         console.log('API Response:', response);
         
         // Ensure dishes is always an array
-        setDishes(Array.isArray(response) ? response : []);
+        const fetchedDishes = Array.isArray(response) ? response : [];
+        setAllDishes(fetchedDishes);
+        setDishes(fetchedDishes);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching dishes:', err);
         setError('Failed to fetch dishes. Please try again later.');
-        setDishes([]); // Set to empty array in case of error
+        setAllDishes([]);
+        setDishes([]);
         setLoading(false);
       }
     };
     
-    fetchDishes();
-  }, [currentUser, searchTerm]);
-  
-  const handleSearch = (e) => {
-    e.preventDefault();
-  };
+    fetchAllDishes();
+  }, [currentUser]);
+    // Handle search term changes (real-time search)
+  useEffect(() => {
+    const performSearch = async () => {
+      if (!searchTerm.trim()) {
+        // If search is empty, show all dishes
+        setDishes(allDishes);
+        return;
+      }
+      
+      try {
+        const results = await DishService.searchDishes(searchTerm);
+        setDishes(results);
+      } catch (error) {
+        console.error('Error searching dishes:', error);
+        // Keep current dishes on error
+      }
+    };
+    
+    performSearch();
+  }, [searchTerm, allDishes]);
   
   if (loading) {
     return (
@@ -77,16 +86,16 @@ const DishList = () => {
     <MainLayout>
       <h2 className="mb-4">Available Dishes</h2>
       
-      <Form onSubmit={handleSearch} className="mb-4">
+      <Form className="mb-4">
         <InputGroup>
+          <InputGroup.Text>
+            <FontAwesomeIcon icon={faSearch} />
+          </InputGroup.Text>
           <Form.Control
-            placeholder="Search dishes..."
+            placeholder="Search dishes by name, description, category..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <Button type="submit" variant="outline-primary">
-            <FontAwesomeIcon icon={faSearch} />
-          </Button>
         </InputGroup>
       </Form>
       
@@ -111,9 +120,12 @@ const DishList = () => {
                   <div className="d-flex justify-content-between mb-2">
                     <Card.Title>{dish.name}</Card.Title>
                     <h5>
-                      <Badge bg="success">${dish.price.toFixed(2)}</Badge>
+                      <Badge bg="success">${dish.price?.toFixed(2) || 'N/A'}</Badge>
                     </h5>
                   </div>
+                  {dish.category && (
+                    <Badge bg="info" className="mb-2">{dish.category}</Badge>
+                  )}
                   <Card.Text>
                     {dish.description}
                   </Card.Text>

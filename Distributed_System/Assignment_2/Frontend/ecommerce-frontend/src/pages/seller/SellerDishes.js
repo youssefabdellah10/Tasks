@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Table, Button, Modal, Form, Alert } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrash, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faPlus } from '@fortawesome/free-solid-svg-icons';
 import DishService from '../../services/dish.service';
 import AuthContext from '../../contexts/AuthContext';
 import MainLayout from '../../layouts/MainLayout';
@@ -155,20 +155,7 @@ const SellerDishes = () => {
       handleClose();
       // Refresh dishes list
       fetchDishes();
-    } catch (err) {
-      setFormError(err.response?.data?.message || 'Failed to save dish');
-    }
-  };
-  
-  const handleDelete = async (dishId) => {
-    if (window.confirm('Are you sure you want to delete this dish?')) {
-      try {
-        await DishService.deleteDish(dishId);
-        // Refresh dishes list
-        fetchDishes();
-      } catch (err) {
-        setError('Failed to delete dish');
-      }
+    } catch (err) {      setFormError(err.response?.data?.message || 'Failed to save dish');
     }
   };
   
@@ -224,21 +211,12 @@ const SellerDishes = () => {
                 </td>
                 <td>${dish.price.toFixed(2)}</td>
                 <td>{dish.stock || 'N/A'}</td>
-                <td>
-                  <Button
+                <td>                  <Button
                     variant="outline-primary"
                     size="sm"
-                    className="me-2"
                     onClick={() => openEditModal(dish)}
                   >
                     <FontAwesomeIcon icon={faEdit} />
-                  </Button>
-                  <Button
-                    variant="outline-danger"
-                    size="sm"
-                    onClick={() => handleDelete(dish.id)}
-                  >
-                    <FontAwesomeIcon icon={faTrash} />
                   </Button>
                 </td>
               </tr>

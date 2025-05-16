@@ -19,10 +19,8 @@ import SellerOrderManagement from './pages/seller/OrderManagement';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/Dashboard';
-import UserManagement from './pages/admin/UserManagement';
-import Reports from './pages/admin/Reports';
-import SystemSettings from './pages/admin/SystemSettings';
-import AdminActivityLogs from './pages/admin/AdminActivityLogs';
+import SellerCreation from './pages/admin/SellerCreation';
+import CompanyView from './pages/admin/CompanyView';
 
 // Common Pages
 import UserProfile from './pages/common/UserProfile';
@@ -99,8 +97,7 @@ function App() {
                 />
               } 
             />
-            
-            {/* Admin Routes */}
+              {/* Admin Routes */}
             <Route 
               path="/admin/dashboard" 
               element={
@@ -111,37 +108,19 @@ function App() {
               } 
             />
             <Route 
-              path="/admin/users" 
+              path="/admin/sellers/create" 
               element={
                 <PrivateRoute 
-                  component={UserManagement} 
+                  component={SellerCreation} 
                   requiredUserType={['admin']} 
                 />
               } 
             />
             <Route 
-              path="/admin/reports" 
+              path="/admin/companies/view" 
               element={
                 <PrivateRoute 
-                  component={Reports} 
-                  requiredUserType={['admin']} 
-                />
-              } 
-            />
-            <Route 
-              path="/admin/settings" 
-              element={
-                <PrivateRoute 
-                  component={SystemSettings} 
-                  requiredUserType={['admin']} 
-                />
-              } 
-            />
-            <Route 
-              path="/admin/activity-logs" 
-              element={
-                <PrivateRoute 
-                  component={AdminActivityLogs} 
+                  component={CompanyView} 
                   requiredUserType={['admin']} 
                 />
               } 

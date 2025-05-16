@@ -20,16 +20,12 @@ const MainNavbar = () => {
         <Navbar.Brand as={Link} to="/">Food Ordering System</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="me-auto">
-            {/* Admin Navigation Links */}
+          <Nav className="me-auto">            {/* Admin Navigation Links */}
             {currentUser && currentUser.userType === 'admin' && (
               <>
                 <Nav.Link as={Link} to="/admin/dashboard">Dashboard</Nav.Link>
-                <NavDropdown title="Management" id="admin-management-dropdown">
-                  <NavDropdown.Item as={Link} to="/admin/users">Users</NavDropdown.Item>
-                </NavDropdown>
-                <Nav.Link as={Link} to="/admin/reports">Reports</Nav.Link>
-                <Nav.Link as={Link} to="/admin/settings">Settings</Nav.Link>
+                <Nav.Link as={Link} to="/admin/sellers/create">Create Seller</Nav.Link>
+                <Nav.Link as={Link} to="/admin/companies/view">View Companies</Nav.Link>
               </>
             )}
 

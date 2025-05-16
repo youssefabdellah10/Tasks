@@ -18,6 +18,8 @@ import java.util.List;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.transaction.Transactional;
+
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 
@@ -159,9 +161,6 @@ public class OrderService {
             payment.setCustomerUsername(username);
             paymentRepository.save(payment);
         }
-        
-        
-        
         try {
             sender.sendOrder(order);
             try {
@@ -181,6 +180,42 @@ public class OrderService {
         Order savedOrder = orderRepository.save(order);
         
         return savedOrder;
+    }
+    @Transactional
+    public boolean ispaid(String token, String orderId) throws Exception {
+        String role = extractRoleFromToken(token);
+        if(role == null || !role.equals("CUSTOMER")) {
+            throw new RuntimeException("Unauthorized access: Invalid role");
+        }
+        String username = extractUsernameFromToken(token);
+        Payment payment = paymentRepository.findPaymentByCustomerUsername(username);
+        if(payment == null) {
+            throw new RuntimeException("Payment not found for user: " + username);
+        }        Order order = orderRepository.findByOrderId(orderId);
+        if(order == null) {
+            throw new RuntimeException("Order not found");
+        }
+        if(!order.getOrderStatus().equals("Pending")) {
+            throw new RuntimeException("Order already paid or rejected. Current status: " + order.getOrderStatus());
+        }
+        if(order.getTotalPrice() > payment.getBalance() ) {
+            order.setorderStatus("rejected");
+            orderRepository.save(order);
+            sender.sendOrderStatus(order);
+             return false;
+        }
+        if(order.getTotalPrice() < Order.getMinCharge()){
+            order.setorderStatus("rejected");
+            orderRepository.save(order);
+            sender.sendOrderStatus(order);
+             return false;
+        }
+        payment.setBalance(payment.getBalance() - order.getTotalPrice());
+        order.setorderStatus("completed");
+        orderRepository.save(order);
+        sender.sendOrderStatus(order);
+        paymentRepository.save(payment);
+        return true;
     }
 
 }

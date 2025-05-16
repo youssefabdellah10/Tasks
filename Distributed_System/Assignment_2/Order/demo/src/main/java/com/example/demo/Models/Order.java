@@ -65,5 +65,8 @@ public class Order {
     } 
     public void setTotalPrice(double totalPrice) {
         this.totalPrice = totalPrice;
-}
+    }
+    public void setorderStatus(String orderStatus) {
+        this.orderStatus = orderStatus;
+    }
 }

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Card, Row, Col, Form, InputGroup, Badge } from 'react-bootstrap';
+import { Card, Row, Col, Form, InputGroup, Badge, Button } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 import DishService from '../../services/dish.service';
 import AuthContext from '../../contexts/AuthContext';
+import CartContext from '../../contexts/CartContext';
 import MainLayout from '../../layouts/MainLayout';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,6 +16,7 @@ const DishList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   
   const { currentUser } = useContext(AuthContext);
+  const { addToCart } = useContext(CartContext);
   const navigate = useNavigate();
   useEffect(() => {
     if (!currentUser) {
@@ -126,10 +128,17 @@ const DishList = () => {
                     <Card.Text className="text-muted">
                       <small><strong>Company:</strong> {dish.companyUsername || 'N/A'}</small>
                     </Card.Text>
-                  </div>
-                </Card.Body>
+                  </div>                </Card.Body>
                 <Card.Footer className="bg-white border-top-0">
-                  {/* Cart functionality removed */}
+                  <Button 
+                    variant="success" 
+                    className="w-100"
+                    onClick={() => addToCart(dish)}
+                    disabled={!dish.stock || dish.stock <= 0}
+                  >
+                    <FontAwesomeIcon icon={faShoppingCart} className="me-2" />
+                    Add to Cart
+                  </Button>
                 </Card.Footer>
               </Card>
             </Col>

@@ -12,6 +12,7 @@ router.post('/create', authenticateToken, dishController.createDish);
 router.put('/update/:id', authenticateToken, dishController.updateDish);
 router.get('/mydishes', authenticateToken, dishController.viewMyDishes);
 router.post('/sendtoqueue', dishController.sendStockNumberToQueue);
+router.post('/update-stock', dishController.updateDishStockFromOrder);
 
 
 module.exports = router;

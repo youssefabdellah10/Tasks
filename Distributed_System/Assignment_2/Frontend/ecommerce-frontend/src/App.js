@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import AuthContext from './contexts/AuthContext';
+import { CartProvider } from './contexts/CartContext';
 import PrivateRoute from './components/common/PrivateRoute';
 
 // Auth Pages
@@ -11,6 +12,7 @@ import Register from './pages/auth/Register';
 // Customer Pages
 import DishList from './pages/customer/DishList';
 import CustomerOrders from './pages/customer/Orders';
+import Cart from './pages/customer/Cart';
 
 // Seller Pages
 import SellerDishes from './pages/seller/SellerDishes';
@@ -32,14 +34,14 @@ import './App.css';
 function App() {
   return (
     <AuthProvider>
+      <CartProvider>
         <Router>
           <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             
-            {/* Customer Routes */}
-            <Route 
+            {/* Customer Routes */}            <Route 
               path="/customer/dishes" 
               element={
                 <PrivateRoute 
@@ -48,7 +50,6 @@ function App() {
                 />
               } 
             />
-            {/* Commented out due to missing Cart component
             <Route 
               path="/customer/cart" 
               element={
@@ -58,7 +59,6 @@ function App() {
                 />
               } 
             />
-            */}
             <Route 
               path="/customer/orders" 
               element={
@@ -142,8 +142,8 @@ function App() {
             {/* Default Routes */}
             <Route path="/" element={<DefaultRedirect />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
-        </Router>
+          </Routes>        </Router>
+      </CartProvider>
     </AuthProvider>
   );
 }

@@ -1,12 +1,14 @@
 import React, { useContext } from 'react';
-import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
+import { Navbar, Nav, Container, NavDropdown, Badge } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faSignOutAlt, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 import AuthContext from '../../contexts/AuthContext';
+import CartContext from '../../contexts/CartContext';
 
 const MainNavbar = () => {
   const { currentUser, logout } = useContext(AuthContext);
+  const { cartCount } = useContext(CartContext);
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -36,12 +38,16 @@ const MainNavbar = () => {
                 <Nav.Link as={Link} to="/seller/dishes">My Dishes</Nav.Link>
                 <Nav.Link as={Link} to="/seller/orders">Orders</Nav.Link>
               </>
-            )}
-
-            {/* Customer Navigation Links */}
+            )}            {/* Customer Navigation Links */}
             {currentUser && currentUser.userType === 'customer' && (
               <>
                 <Nav.Link as={Link} to="/customer/dishes">Menu</Nav.Link>
+                <Nav.Link as={Link} to="/customer/cart">
+                  <FontAwesomeIcon icon={faShoppingCart} /> Cart
+                  {cartCount > 0 && (
+                    <Badge pill bg="danger" className="ms-1">{cartCount}</Badge>
+                  )}
+                </Nav.Link>
                 <Nav.Link as={Link} to="/customer/orders">My Orders</Nav.Link>
               </>
             )}

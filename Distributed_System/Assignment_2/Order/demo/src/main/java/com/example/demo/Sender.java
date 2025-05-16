@@ -76,8 +76,14 @@ public class Sender {
             channel.basicPublish(EXCHANGE_NAME, ORDER_STATUS_ROUTING_KEY, null, message.getBytes());
             System.out.println(" [x] Sent order status update for order '" + order.getOrderId()+ "' to topic exchange");
         }
-    }
-     public void sendOrderNotification(Order order) throws Exception {
+    }     
+    public void sendOrderNotification(Order order) throws Exception {
+        if (order == null) {
+            System.err.println("Cannot send notification for null order");
+            return;
+        }
+        
+        System.out.println("Preparing to send notification for order: " + order.getOrderId());
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
         try (Connection connection = factory.newConnection();
@@ -85,12 +91,15 @@ public class Sender {
             
             // Declare the topic exchange
             channel.exchangeDeclare(EXCHANGE_NAME, "topic", true);
+            System.out.println("Exchange declared: " + EXCHANGE_NAME);
             
             // Declare the order notification queue
             channel.queueDeclare(ORDER_noti_QUEUE_NAME, true, false, false, null);
+            System.out.println("Queue declared: " + ORDER_noti_QUEUE_NAME);
             
             // Bind the queue to the exchange
             channel.queueBind(ORDER_noti_QUEUE_NAME, EXCHANGE_NAME, ORDER_noti_ROUTING_KEY);
+            System.out.println("Queue bound to exchange with routing key: " + ORDER_noti_ROUTING_KEY);
             
             // Create an order notification message (JSON)
             ObjectMapper objectMapper = new ObjectMapper();
@@ -105,6 +114,11 @@ public class Sender {
             
             channel.basicPublish(EXCHANGE_NAME, ORDER_noti_ROUTING_KEY, null, message.getBytes());
             System.out.println(" [x] Sent order notification for order '" + order.getOrderId()+ "' to topic exchange");
+            System.out.println(" [x] Message content: " + message);
+        } catch (Exception e) {
+            System.err.println("Error sending notification for order " + order.getOrderId() + ": " + e.getMessage());
+            e.printStackTrace();
+            throw e;
         }
     }
 }

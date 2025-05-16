@@ -17,10 +17,9 @@ import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 @Stateless
-public class Receiver {
-    private static final String EXCHANGE_NAME = "order_exchange";
-    private static final String ORDER_STATUS_QUEUE_NAME = "order_status_queue";
-    private static final String ORDER_STATUS_ROUTING_KEY = "order.status";
+public class Receiver {    private static final String EXCHANGE_NAME = "order_exchange";
+    private static final String ORDER_NOTIFICATION_QUEUE_NAME = "notification";
+    private static final String ORDER_NOTIFICATION_ROUTING_KEY = "orders.noti";
     
     @EJB
     private CustomerRepo customerRepo;
@@ -35,17 +34,15 @@ public class Receiver {
             
             // Declare the topic exchange
             channel.exchangeDeclare(EXCHANGE_NAME, "topic", true);
-            
-            // Declare the order status queue
-            channel.queueDeclare(ORDER_STATUS_QUEUE_NAME, true, false, false, null);
+              // Declare the order notification queue
+            channel.queueDeclare(ORDER_NOTIFICATION_QUEUE_NAME, true, false, false, null);
             
             // Bind the queue to the exchange
-            channel.queueBind(ORDER_STATUS_QUEUE_NAME, EXCHANGE_NAME, ORDER_STATUS_ROUTING_KEY);
+            channel.queueBind(ORDER_NOTIFICATION_QUEUE_NAME, EXCHANGE_NAME, ORDER_NOTIFICATION_ROUTING_KEY);
             
             System.out.println(" [*] Waiting for a single order status message...");
-            
-            // Get a single message without auto-ack
-            GetResponse response = channel.basicGet(ORDER_STATUS_QUEUE_NAME, false);
+              // Get a single message without auto-ack
+            GetResponse response = channel.basicGet(ORDER_NOTIFICATION_QUEUE_NAME, false);
             
             if (response == null) {
                 System.out.println("No message available.");

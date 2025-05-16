@@ -2,7 +2,7 @@ import axios from 'axios';
 const API_BASE_URL = {
   user: 'http://localhost:7000/users/api', 
   dish: 'http://localhost:3001/api', 
-  order: 'http://localhost:8083/api',
+  order: 'http://localhost:7050/api',
 };
 const userApi = axios.create({
   baseURL: API_BASE_URL.user,

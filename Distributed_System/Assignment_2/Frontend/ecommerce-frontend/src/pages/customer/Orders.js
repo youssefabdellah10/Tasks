@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Table, Badge, Button, Card, Alert, Container, Row, Col, Modal } from 'react-bootstrap';
+import { Table, Badge, Button, Card, Container, Row, Col, Modal } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
@@ -7,24 +7,20 @@ import OrderService from '../../services/order.service';
 import AuthContext from '../../contexts/AuthContext';
 import MainLayout from '../../layouts/MainLayout';
 
-const CustomerOrders = () => {
-  const { currentUser } = useContext(AuthContext);
+const CustomerOrders = () => {  const { currentUser } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const navigate = useNavigate();
-
-  useEffect(() => {
+  const navigate = useNavigate();  useEffect(() => {
     const fetchOrders = async () => {
       try {
         setLoading(true);
-        const response = await OrderService.getCustomerOrders(currentUser.userId);
+        const response = await OrderService.getMyOrders();
         setOrders(response);
         setLoading(false);
       } catch (err) {
-        setError('Failed to load orders');
+        console.error('Error fetching orders:', err);
         setLoading(false);
       }
     };
@@ -38,16 +34,15 @@ const CustomerOrders = () => {
     setSelectedOrder(order);
     setShowOrderDetails(true);
   };
-
   const handleCancelOrder = async (orderId) => {
     try {
       await OrderService.updateOrderStatus(orderId, 'CANCELLED');
-      // Update the local state to reflect the change
       setOrders(orders.map(order => 
         order.id === orderId ? { ...order, status: 'CANCELLED' } : order
       ));
     } catch (err) {
-      setError('Failed to cancel order');
+      console.error('Error cancelling order:', err);
+      // Silently handle the error without displaying an error message
     }
   };
 
@@ -81,11 +76,8 @@ const CustomerOrders = () => {
   }
 
   return (
-    <MainLayout>
-      <Container>
+    <MainLayout>      <Container>
         <h2 className="mb-4">My Orders</h2>
-        
-        {error && <Alert variant="danger">{error}</Alert>}
         
         {orders.length === 0 ? (
           <Card className="text-center p-5 shadow-sm">

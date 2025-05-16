@@ -124,8 +124,7 @@ public class OrderService {
             throw new RuntimeException("Unauthorized access: Admin role required");
         }
         return orderRepository.findAll();
-    }   
-    public void createdOrder(List<Integer> dishIds, String token) {
+    }     public Order createdOrder(List<Integer> dishIds, String token) {
         String role = extractRoleFromToken(token);
         if(role == null || !role.equals("CUSTOMER")) {
             throw new RuntimeException("Unauthorized access: Invalid role");
@@ -150,6 +149,8 @@ public class OrderService {
             System.err.println("Failed to send order to message queue: " + e.getMessage());
             e.printStackTrace();
         }
+        
+        return savedOrder;
     }
 
 }

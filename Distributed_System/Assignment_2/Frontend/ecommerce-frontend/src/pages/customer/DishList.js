@@ -16,24 +16,17 @@ const DishList = () => {
   
   const { currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
-  
-  // Extra check to ensure authentication
   useEffect(() => {
     if (!currentUser) {
       console.log('No user detected in DishList, redirecting to login');
       navigate('/login');
     }
   }, [currentUser, navigate]);
-  
-  // Load all dishes once
   useEffect(() => {
     const fetchAllDishes = async () => {
       try {
         setLoading(true);
         const response = await DishService.getAllDishes();
-        console.log('API Response:', response);
-        
-        // Ensure dishes is always an array
         const fetchedDishes = Array.isArray(response) ? response : [];
         setAllDishes(fetchedDishes);
         setDishes(fetchedDishes);
@@ -49,11 +42,9 @@ const DishList = () => {
     
     fetchAllDishes();
   }, [currentUser]);
-    // Handle search term changes (real-time search)
   useEffect(() => {
     const performSearch = async () => {
       if (!searchTerm.trim()) {
-        // If search is empty, show all dishes
         setDishes(allDishes);
         return;
       }
@@ -63,7 +54,6 @@ const DishList = () => {
         setDishes(results);
       } catch (error) {
         console.error('Error searching dishes:', error);
-        // Keep current dishes on error
       }
     };
     

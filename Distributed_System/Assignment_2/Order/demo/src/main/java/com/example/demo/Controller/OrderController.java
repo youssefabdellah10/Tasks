@@ -1,5 +1,6 @@
 package com.example.demo.Controller;
 
+import com.example.demo.Models.Order;
 import com.example.demo.Services.OrderService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,14 +31,14 @@ public class OrderController {
             return ResponseEntity.ok(orderService.getAllOrders(token));
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error retrieving all orders: " + e.getMessage());
-        }
-    }
-      @PostMapping("/placeOrder")
+        }    
+    }      
+    @PostMapping("/placeOrder")
     public ResponseEntity<?> createOrder(@RequestBody List<Integer> dishIds, 
                                         @RequestHeader("Authorization") String token) {
         try {
-            orderService.createdOrder(dishIds, token);
-            return ResponseEntity.ok("Order created successfully");
+            Order order = orderService.createdOrder(dishIds, token);
+            return ResponseEntity.ok(order);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error placing order: " + e.getMessage());
         }

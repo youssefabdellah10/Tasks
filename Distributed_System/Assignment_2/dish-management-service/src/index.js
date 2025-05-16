@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const dishRoutes = require('./routes/dish.routes');
 const { db: sequelizeInstance } = require('./config/config');
 const Dish = require('./models/dish.model');
+const { connectRabbitMQ } = require('./services/rabbitmq.service');
 dotenv.config();
 
 const app = express();
@@ -19,9 +20,16 @@ sequelizeInstance
     .then(() => {
         console.log('Connected to PostgreSQL database');
         return sequelizeInstance.sync();
-    })
-    .then(() => {
+    })    .then(() => {
         console.log('Database models synchronized');
+        
+        // Initialize RabbitMQ connection
+        connectRabbitMQ().then(() => {
+            console.log('RabbitMQ initialized');
+        }).catch(err => {
+            console.error('RabbitMQ initialization error:', err);
+        });
+        
         app.listen(PORT, () => {
             console.log(`Dish Management Service running on port ${PORT}`);
         });

@@ -1,5 +1,5 @@
 const Dish = require('../models/dish.model');
-
+const { sendNumberToQueue } = require('../services/rabbitmq.service');
 
 exports.getAllDishes = async(req, res) => {
   try {
@@ -181,7 +181,6 @@ exports.checkDishStock = async(req, res) => {
   }
 };
 
-
 exports.viewMyDishes = async(req, res) => {
   const { sellerusername, companyUsername } = req.user;
   
@@ -196,5 +195,26 @@ exports.viewMyDishes = async(req, res) => {
   } catch (error) {
     console.error('Error retrieving your dishes:', error);
     res.status(500).json({message: 'Error retrieving your dishes', error: error.message });
+  }
+};
+
+exports.sendStockNumberToQueue = async(req, res) => {
+  const { number } = req.body;
+  
+  if (number === undefined || isNaN(number)) {
+    return res.status(400).json({message: 'Valid number is required'});
+  }
+  
+  try {
+    const result = await sendNumberToQueue(Number(number));
+    
+    if (result) {
+      res.status(200).json({message: `Number ${number} sent to dishStock queue successfully`});
+    } else {
+      res.status(500).json({message: 'Failed to send number to queue'});
+    }
+  } catch (error) {
+    console.error('Error sending number to queue:', error);
+    res.status(500).json({message: 'Error sending number to queue', error: error.message});
   }
 };

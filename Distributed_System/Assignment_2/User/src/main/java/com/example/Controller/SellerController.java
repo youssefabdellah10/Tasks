@@ -14,20 +14,29 @@ import jakarta.ws.rs.QueryParam;
 @Path("/seller")
 public class SellerController {
     @Inject
-    SellerService sellerService;
-    @POST
+    SellerService sellerService;    @POST
     @Path("/create")
     @Produces(MediaType.APPLICATION_JSON)
     public Response createSeller( @QueryParam("companyName") String companyName  ,@QueryParam("name") String name) {
         try {
              Seller seller=sellerService.generateSellerAccount(companyName,name);
+             java.util.Map<String, Object> responseObj = new java.util.HashMap<>();
+             responseObj.put("success", true);
+             responseObj.put("message", "Seller created successfully");
+             responseObj.put("username", seller.getUsername());
+             responseObj.put("password", seller.getPassword());
+             
             return Response.status(Response.Status.CREATED)
-                    .entity("Seller created successfully with username: " + seller.getUsername()+" and password: " + seller.getPassword())
+                    .entity(responseObj)
                     .build();
         } catch (Exception e) {
             e.printStackTrace();
+            java.util.Map<String, Object> errorObj = new java.util.HashMap<>();
+            errorObj.put("success", false);
+            errorObj.put("error", e.getMessage());
+            
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error creating seller: " + e.getMessage())
+                    .entity(errorObj)
                     .build();
         }
     }

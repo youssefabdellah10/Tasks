@@ -60,10 +60,6 @@ const CompanyView = () => {
                 <tr>
                   <th>#</th>
                   <th>Company Name</th>
-                  <th>Owner</th>
-                  <th>Contact Email</th>
-                  <th>Phone</th>
-                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -71,14 +67,6 @@ const CompanyView = () => {
                   <tr key={company.id}>
                     <td>{index + 1}</td>
                     <td>{company.name}</td>
-                    <td>{company.ownerName}</td>
-                    <td>{company.email}</td>
-                    <td>{company.phone}</td>
-                    <td>
-                      <span className={`badge bg-${company.isActive ? 'success' : 'danger'}`}>
-                        {company.isActive ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
                   </tr>
                 ))}
               </tbody>

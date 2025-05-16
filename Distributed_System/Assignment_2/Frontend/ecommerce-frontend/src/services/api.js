@@ -1,19 +1,15 @@
 import axios from 'axios';
-
-// Base URLs for different microservices
 const API_BASE_URL = {
-  user: 'http://localhost:7000/users/api', // User, Admin, Company, Seller service
-  dish: 'http://localhost:3001/api', // Dish management service
-  order: 'http://localhost:8083/api', // Order service
+  user: 'http://localhost:7000/users/api', 
+  dish: 'http://localhost:3001/api', 
+  order: 'http://localhost:8083/api',
 };
-
-// Create axios instances for each service
 const userApi = axios.create({
   baseURL: API_BASE_URL.user,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000, // 10 seconds timeout
+  timeout: 10000,
 });
 
 const dishApi = axios.create({
@@ -31,8 +27,6 @@ const orderApi = axios.create({
   },
   timeout: 10000,
 });
-
-// Add request interceptor to include auth token
 const addAuthToken = (api) => {
   api.interceptors.request.use(
     (config) => {
@@ -50,33 +44,20 @@ const addAuthToken = (api) => {
       return Promise.reject(error);
     }
   );
-  
-  // Add response interceptor for error handling
   api.interceptors.response.use(
     (response) => {
       return response;
     },
     (error) => {
-      // Handle token expiration
       if (error.response && error.response.status === 401) {
-        // Instead of forcing a redirect, we'll just clear the storage
-        // and let React Router handle the redirect appropriately
         localStorage.removeItem('token');
         localStorage.removeItem('userType');
         localStorage.removeItem('userId');
         localStorage.removeItem('companyId');
-        
-        // Let the component handle redirection through React Router
         console.error('Authentication failed, clearing token');
       }
-      
-      // Create a more descriptive error message
       const errorMessage = error.response?.data?.message || error.message || 'Unknown error occurred';
-      
-      // Log the error for debugging
       console.error(`API Error: ${errorMessage}`, error);
-      
-      // Enhance the error object with more details
       const enhancedError = {
         ...error,
         message: errorMessage,

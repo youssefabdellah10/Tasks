@@ -1,20 +1,25 @@
 import { userApi } from './api';
+import axios from 'axios';
 
-const AdminService = {
-  // Get all companies - needed to show the list of existing companies to choose from
+const AdminService = {  
   getAllCompanies: async () => {
     try {
-      const response = await userApi.get('/admin/companies');
-      return response.data;
+      const response = await userApi.get('/company/all');
+      return response.data.map(companyName => ({
+        id: companyName,
+        name: companyName
+      }));
     } catch (error) {
       throw error;
     }
   },
-  
-  // Create a seller for an existing company
   createSellerForCompany: async (sellerData) => {
     try {
-      const response = await userApi.post('/admin/companies/seller', sellerData);
+      const companyName = sellerData.companyId;
+      const sellerName = sellerData.sellerName;
+      const response = await axios.post(
+        `http://localhost:7000/users/api/seller/create?companyName=${companyName}&name=${sellerName}`
+      );
       return response.data;
     } catch (error) {
       throw error;

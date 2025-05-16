@@ -1,31 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Button, Card, Table, Alert, Spinner, Col, Row } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faBuilding, faUser, faEnvelope, faPhone, faKey, faCopy, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faBuilding, faCopy, faCheck } from '@fortawesome/free-solid-svg-icons';
 import MainLayout from '../../layouts/MainLayout';
 import AdminService from '../../services/admin.service';
 
 const SellerCreation = () => {
-  // State for companies list
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [createdSeller, setCreatedSeller] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
-  
-  // Form state
   const [formData, setFormData] = useState({
     companyId: '',
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    username: '',
-    password: ''
+    sellerName: ''
   });
-
-  // Fetch companies on component mount
   useEffect(() => {
     fetchCompanies();
   }, []);
@@ -41,25 +31,19 @@ const SellerCreation = () => {
       setLoading(false);
     }
   };
-  
-  // Handle form input change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-  
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validate input
     if (!formData.companyId) {
       setError('Please select a company');
       return;
     }
     
-    if (!formData.firstName || !formData.lastName || !formData.email) {
-      setError('Please fill in all required fields');
+    if (!formData.sellerName) {
+      setError('Please enter a name for the seller');
       return;
     }
     
@@ -67,21 +51,13 @@ const SellerCreation = () => {
       setLoading(true);
       setError('');
       setSuccess('');
-      
-      // Call API to create seller account
       const result = await AdminService.createSellerForCompany(formData);
       
       setCreatedSeller(result);
       setSuccess('Successfully created seller account');
-      // Reset form
       setFormData({
         companyId: '',
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        username: '',
-        password: ''
+        sellerName: ''
       });
       setLoading(false);
     } catch (err) {
@@ -89,8 +65,6 @@ const SellerCreation = () => {
       setLoading(false);
     }
   };
-  
-  // Copy credentials to clipboard
   const copyToClipboard = (text, field) => {
     navigator.clipboard.writeText(text);
     setCopiedId(field);
@@ -109,9 +83,12 @@ const SellerCreation = () => {
           <Card className="mb-4">
             <Card.Header>
               <FontAwesomeIcon icon={faPlus} className="me-2" />
-              New Seller Information
+              New Seller Account
             </Card.Header>
             <Card.Body>
+              <p className="mb-3">
+                Select a company to generate a seller account. The system will automatically create a username and password.
+              </p>
               <Form onSubmit={handleSubmit}>
                 <Form.Group className="mb-3">
                   <Form.Label>Select Company <span className="text-danger">*</span></Form.Label>
@@ -131,108 +108,42 @@ const SellerCreation = () => {
                   </Form.Select>
                 </Form.Group>
                 
-                <Row>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>First Name <span className="text-danger">*</span></Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleChange}
-                        required
-                        disabled={loading}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Last Name <span className="text-danger">*</span></Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleChange}
-                        required
-                        disabled={loading}
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-                
-                <Row>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Email <span className="text-danger">*</span></Form.Label>
-                      <Form.Control
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                        disabled={loading}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Phone</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        disabled={loading}
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-                
-                <Row>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Username</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        disabled={loading}
-                        placeholder="Auto-generated if left blank"
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Password</Form.Label>
-                      <Form.Control
-                        type="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        disabled={loading}
-                        placeholder="Auto-generated if left blank"
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
+                <Form.Group className="mb-3">
+                  <Form.Label>Seller Name <span className="text-danger">*</span></Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="sellerName"
+                    value={formData.sellerName}
+                    onChange={handleChange}
+                    placeholder="Enter seller name (e.g., John Smith)"
+                    required
+                    disabled={loading}
+                  />
+                  <Form.Text className="text-muted">
+                    This name will be used to generate the seller's account.
+                  </Form.Text>
+                </Form.Group>
                 
                 <Button 
-                  variant="primary" 
                   type="submit" 
-                  disabled={loading}
+                  variant="primary" 
+                  disabled={loading} 
                   className="mt-3"
                 >
                   {loading ? (
                     <>
-                      <Spinner as="span" animation="border" size="sm" className="me-2" />
-                      Creating...
+                      <Spinner
+                        as="span"
+                        animation="border"
+                        size="sm"
+                        role="status"
+                        aria-hidden="true"
+                        className="me-2"
+                      />
+                      Generating...
                     </>
                   ) : (
-                    <>
-                      <FontAwesomeIcon icon={faPlus} className="me-2" />
-                      Create Seller Account
-                    </>
+                    'Generate Seller Account'
                   )}
                 </Button>
               </Form>
@@ -248,10 +159,10 @@ const SellerCreation = () => {
                 Account Created Successfully
               </Card.Header>
               <Card.Body>
-                <h5>{createdSeller.firstName} {createdSeller.lastName}</h5>
+                <h5>New Seller</h5>
                 <p className="text-muted mb-3">
                   <FontAwesomeIcon icon={faBuilding} className="me-2" />
-                  {createdSeller.companyName}
+                  {formData.companyId}
                 </p>
                 
                 <Table bordered size="sm" className="mt-3">
@@ -290,16 +201,6 @@ const SellerCreation = () => {
                         </Button>
                       </td>
                     </tr>
-                    <tr>
-                      <th>Email</th>
-                      <td>{createdSeller.email}</td>
-                    </tr>
-                    {createdSeller.phone && (
-                      <tr>
-                        <th>Phone</th>
-                        <td>{createdSeller.phone}</td>
-                      </tr>
-                    )}
                   </tbody>
                 </Table>
                 

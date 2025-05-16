@@ -1,9 +1,12 @@
 import axios from 'axios';
+import tokenUtils from '../utils/tokenUtils';
+
 const API_BASE_URL = {
   user: 'http://localhost:7000/users/api', 
   dish: 'http://localhost:3001/api', 
   order: 'http://localhost:7050/api',
 };
+
 const userApi = axios.create({
   baseURL: API_BASE_URL.user,
   headers: {
@@ -27,13 +30,31 @@ const orderApi = axios.create({
   },
   timeout: 10000,
 });
+
 const addAuthToken = (api) => {
   api.interceptors.request.use(
     (config) => {
       const token = localStorage.getItem('token');
       if (token) {
-        console.log(`Adding token to ${config.url}`);
+        // Check if token is expired
+        if (tokenUtils.isTokenExpired()) {
+          console.warn('Token expired, logging out');
+          // Clear all auth data
+          localStorage.removeItem('token');
+          localStorage.removeItem('userType');
+          localStorage.removeItem('userId');
+          localStorage.removeItem('companyId');
+          // Clear cart data
+          localStorage.removeItem('cart');
+          // Redirect to login if not already there
+          if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+            window.location.href = '/login';
+          }
+          return config;
+        }
+          console.log(`Adding token to ${config.url}`);
         config.headers['Authorization'] = `Bearer ${token}`;
+        console.log('Authorization header set:', config.headers['Authorization']);
       } else {
         console.warn(`No token available for request to ${config.url}`);
       }

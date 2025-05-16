@@ -1,73 +1,69 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Card, Row, Col, Form, InputGroup, Badge, Button } from 'react-bootstrap';
+import { Card, Row, Col, Badge, Button, Alert, Form } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
+import { faShoppingCart, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { useParams, useNavigate } from 'react-router-dom';
 import DishService from '../../services/dish.service';
 import AuthContext from '../../contexts/AuthContext';
 import CartContext from '../../contexts/CartContext';
 import MainLayout from '../../layouts/MainLayout';
-import { useNavigate, Link } from 'react-router-dom';
 
-const DishList = () => {  const [dishes, setDishes] = useState([]);
-  const [allDishes, setAllDishes] = useState([]);
+const CompanyDishes = () => {
+  const [dishes, setDishes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [companyName, setCompanyName] = useState('');
   const [companies, setCompanies] = useState([]);
   
+  const { companyUsername } = useParams();
   const { currentUser } = useContext(AuthContext);
   const { addToCart } = useContext(CartContext);
   const navigate = useNavigate();
+  
   useEffect(() => {
     if (!currentUser) {
-      console.log('No user detected in DishList, redirecting to login');
+      console.log('No user detected in CompanyDishes, redirecting to login');
       navigate('/login');
     }
-  }, [currentUser, navigate]);  useEffect(() => {
-    const fetchAllDishes = async () => {
+  }, [currentUser, navigate]);
+  
+  useEffect(() => {
+    const fetchCompanyDishes = async () => {
       try {
         setLoading(true);
-        const response = await DishService.getAllDishes();
-        const fetchedDishes = Array.isArray(response) ? response : [];
-        setAllDishes(fetchedDishes);
-        setDishes(fetchedDishes);
+        setCompanyName(companyUsername); // Set company name from URL parameter
         
-        // Extract unique companies from dishes
-        const uniqueCompanies = [...new Set(fetchedDishes
+        // Fetch all dishes to get companies list
+        const allDishesResponse = await DishService.getAllDishes();
+        const allDishes = Array.isArray(allDishesResponse) ? allDishesResponse : [];
+        
+        // Extract unique companies
+        const uniqueCompanies = [...new Set(allDishes
           .filter(dish => dish.companyUsername)
           .map(dish => dish.companyUsername))];
         setCompanies(uniqueCompanies);
         
+        // Fetch dishes for the selected company
+        const response = await DishService.getCompanyDishes(companyUsername);
+        const fetchedDishes = Array.isArray(response) ? response : [];
+        
+        setDishes(fetchedDishes);
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching dishes:', err);
-        setError('Failed to fetch dishes. Please try again later.');
-        setAllDishes([]);
+        console.error('Error fetching company dishes:', err);
+        setError(`Failed to fetch dishes for ${companyUsername}. Please try again later.`);
         setDishes([]);
-        setCompanies([]);
         setLoading(false);
       }
     };
     
-    fetchAllDishes();
-  }, [currentUser]);
-  useEffect(() => {
-    const performSearch = async () => {
-      if (!searchTerm.trim()) {
-        setDishes(allDishes);
-        return;
-      }
-      
-      try {
-        const results = await DishService.searchDishes(searchTerm);
-        setDishes(results);
-      } catch (error) {
-        console.error('Error searching dishes:', error);
-      }
-    };
-    
-    performSearch();
-  }, [searchTerm, allDishes]);
+    if (companyUsername) {
+      fetchCompanyDishes();
+    } else {
+      setError('No company specified');
+      setLoading(false);
+    }
+  }, [companyUsername]);
   
   if (loading) {
     return (
@@ -80,16 +76,29 @@ const DishList = () => {  const [dishes, setDishes] = useState([]);
       </MainLayout>
     );
   }
-    return (
-    <MainLayout>      <h2 className="mb-4">Available Dishes</h2>
+  
+  return (
+    <MainLayout>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2>{companyName}'s Dishes</h2>
+        <Button variant="outline-primary" onClick={() => navigate('/customer/dishes')}>
+          <FontAwesomeIcon icon={faArrowLeft} className="me-2" />
+          Back to All Dishes
+        </Button>
+      </div>
       
       {companies.length > 0 && (
         <div className="mb-4">
-          <h5>Browse by Company:</h5>
+          <Form.Label>Switch to another company:</Form.Label>
           <Form.Select 
-            className="mb-3" 
-            onChange={(e) => e.target.value && navigate(`/customer/company/${e.target.value}`)}
-            aria-label="Select a company"
+            value={companyUsername}
+            onChange={(e) => {
+              if (e.target.value) {
+                navigate(`/customer/company/${e.target.value}`);
+              } else {
+                navigate('/customer/dishes');
+              }
+            }}
           >
             <option value="">All Companies</option>
             {companies.map(company => (
@@ -99,23 +108,10 @@ const DishList = () => {  const [dishes, setDishes] = useState([]);
         </div>
       )}
       
-      <Form className="mb-4">
-        <InputGroup>
-          <InputGroup.Text>
-            <FontAwesomeIcon icon={faSearch} />
-          </InputGroup.Text>
-          <Form.Control
-            placeholder="Search dishes by name, description, category..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </InputGroup>
-      </Form>
-      
-      {error && <div className="alert alert-danger">{error}</div>}
+      {error && <Alert variant="danger">{error}</Alert>}
       
       {dishes.length === 0 ? (
-        <div className="alert alert-info">No dishes found.</div>
+        <Alert variant="info">No dishes found for this company.</Alert>
       ) : (
         <Row xs={1} md={2} lg={3} className="g-4">
           {dishes.map((dish, index) => (
@@ -142,19 +138,15 @@ const DishList = () => {  const [dishes, setDishes] = useState([]);
                   <Card.Text>
                     {dish.description}
                   </Card.Text>
-                  <div className="mt-3 border-top pt-2">                    <Card.Text className="text-muted mb-1">
+                  <div className="mt-3 border-top pt-2">
+                    <Card.Text className="text-muted mb-1">
                       <small><strong>Seller:</strong> {dish.sellerusername || 'N/A'}</small>
                     </Card.Text>
                     <Card.Text className="text-muted">
-                      <small><strong>Company:</strong> {' '}
-                        {dish.companyUsername ? (
-                          <Link to={`/customer/company/${dish.companyUsername}`}>
-                            {dish.companyUsername}
-                          </Link>
-                        ) : 'N/A'}
-                      </small>
+                      <small><strong>Company:</strong> {dish.companyUsername || 'N/A'}</small>
                     </Card.Text>
-                  </div>                </Card.Body>
+                  </div>
+                </Card.Body>
                 <Card.Footer className="bg-white border-top-0">
                   <Button 
                     variant="success" 
@@ -175,4 +167,4 @@ const DishList = () => {  const [dishes, setDishes] = useState([]);
   );
 };
 
-export default DishList;
+export default CompanyDishes;

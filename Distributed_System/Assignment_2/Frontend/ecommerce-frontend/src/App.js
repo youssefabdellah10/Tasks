@@ -13,6 +13,7 @@ import Register from './pages/auth/Register';
 import DishList from './pages/customer/DishList';
 import CustomerOrders from './pages/customer/Orders';
 import Cart from './pages/customer/Cart';
+import CompanyDishes from './pages/customer/CompanyDishes';
 
 // Seller Pages
 import SellerDishes from './pages/seller/SellerDishes';
@@ -58,12 +59,20 @@ function App() {
                   requiredUserType={['customer']} 
                 />
               } 
-            />
-            <Route 
+            />            <Route 
               path="/customer/orders" 
               element={
                 <PrivateRoute 
                   component={CustomerOrders} 
+                  requiredUserType={['customer']} 
+                />
+              } 
+            />
+            <Route 
+              path="/customer/company/:companyUsername" 
+              element={
+                <PrivateRoute 
+                  component={CompanyDishes} 
                   requiredUserType={['customer']} 
                 />
               } 

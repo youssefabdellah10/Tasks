@@ -26,6 +26,16 @@ export const AuthProvider = ({ children }) => {
         console.log("Token payload:", decodedToken);
         console.log("Token expired:", tokenUtils.isTokenExpired());
         
+        // If token is expired, log out
+        if (tokenUtils.isTokenExpired()) {
+          console.log("Token is expired, logging out");
+          AuthService.logout();
+          setCurrentUser(null);
+          setIsLoading(false);
+          setAuthChecked(true);
+          return;
+        }
+        
         // Check if the token has the required fields
         if (decodedToken) {
           const hasUserIdentifier = !!(decodedToken.sub || decodedToken.username || decodedToken.userId);
@@ -50,6 +60,22 @@ export const AuthProvider = ({ children }) => {
     
     checkLoggedIn();
   }, [authChecked]);
+
+  // Set up a timer to check token expiration periodically
+  useEffect(() => {
+    if (!currentUser) return;
+    
+    const checkTokenInterval = setInterval(() => {
+      if (tokenUtils.isTokenExpired()) {
+        console.log("Token expiration detected in timer, logging out");
+        AuthService.logout();
+        setCurrentUser(null);
+      }
+    }, 60000); // Check every minute
+    
+    // Clear interval on unmount
+    return () => clearInterval(checkTokenInterval);
+  }, [currentUser]);
 
   const login = async (username, password, userType) => {
     try {

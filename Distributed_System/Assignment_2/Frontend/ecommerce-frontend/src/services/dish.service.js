@@ -9,10 +9,9 @@ const DishService = {
       console.error('Error in getAllDishes:', error);
       throw error;
     }
-  },
-  getCompanyDishes: async (companyId) => {
+  },  getCompanyDishes: async (companyUsername) => {
     try {
-      const response = await dishApi.get(`/dishes/company/${companyId}`);
+      const response = await dishApi.get(`/dishes/company/${companyUsername}`);
       return response.data.dishes || [];
     } catch (error) {
       throw error;

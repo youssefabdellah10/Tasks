@@ -5,6 +5,7 @@ import com.example.demo.Models.OrderItem;
 import com.example.demo.Services.OrderService;
 
 import jakarta.ws.rs.QueryParam;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/orders")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"}, allowedHeaders = "*", allowCredentials = "false")
 public class OrderController {
 
     private final OrderService orderService;
@@ -38,7 +40,7 @@ public class OrderController {
             return ResponseEntity.status(500).body("Error retrieving all orders: " + e.getMessage());
         }    
     } 
-     @PostMapping("/placeOrder")
+     @PostMapping("/placeorder")
     public ResponseEntity<?> createOrder(@RequestBody List<OrderItem> orderItems, 
                                         @RequestHeader("Authorization") String token) {
         try {

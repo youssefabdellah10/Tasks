@@ -24,16 +24,81 @@ const Cart = () => {
       
       setLoading(true);
       setError('');
-      const orderItems = getOrderItems();
-      const response = await OrderService.placeOrder(orderItems);
-      clearCart();
-      setSuccess('Order placed successfully! Redirecting to your orders...');
-      setTimeout(() => {
-        navigate('/customer/orders');
-      }, 2000);
       
+      // Make sure we have a valid auth token
+      if (!currentUser || !currentUser.userId) {
+        setError('You must be logged in to place an order');
+        setLoading(false);
+        return;
+      }
+      
+      // Get order items in the correct format
+      const orderItems = getOrderItems();
+      console.log('Submitting order with items:', orderItems);
+      
+      try {
+        // Check if the user has a valid token before proceeding
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setError('You must be logged in to place an order. Please log in and try again.');
+          setLoading(false);
+          return;
+        }
+        
+        console.log('Token used for authentication:', token.substring(0, 10) + '...');
+        console.log('Sending order request to API endpoint:', OrderService.getBaseUrl() + '/orders/placeorder');
+        
+        // Show more detailed logging during order placement
+        try {
+          console.log('About to call OrderService.placeOrder with items:', JSON.stringify(orderItems));
+          const response = await OrderService.placeOrder(orderItems);
+          console.log('Order placed successfully:', response);
+          
+          // Only clear cart if order was successful
+          clearCart();
+          setSuccess('Order placed successfully! Redirecting to your orders...');
+          
+          // Redirect to orders page after a short delay
+          setTimeout(() => {
+            navigate('/customer/orders');
+          }, 2000);
+        } catch (innerError) {
+          console.error('Inner error during order placement:', innerError);
+          throw innerError;
+        }
+      } catch (apiError) {
+        console.error('API Error in handlePlaceOrder:', apiError);
+        
+        // Extract most informative error message
+        let errorMsg = 'Failed to place order. Please try again.';
+        
+        if (apiError.response) {
+          console.error('Response error data:', apiError.response.data);
+          console.error('Response status:', apiError.response.status);
+          
+          if (typeof apiError.response.data === 'string') {
+            errorMsg = apiError.response.data;
+          } else if (apiError.response.data && apiError.response.data.message) {
+            errorMsg = apiError.response.data.message;
+          } else if (apiError.response.data && apiError.response.data.error) {
+            errorMsg = apiError.response.data.error;
+          }
+        } else if (apiError.request) {
+          // The request was made but no response was received
+          console.error('No response received:', apiError.request);
+          errorMsg = 'Network error: The server is not responding. Please try again later.';
+        } else if (apiError.message) {
+          errorMsg = apiError.message;
+        }
+        else if (apiError.message) {
+          errorMsg = apiError.message;
+        }
+        
+        setError(errorMsg);
+      }
     } catch (err) {
-      setError(err.response?.data || 'Failed to place order. Please try again.');
+      console.error('Unexpected error in handlePlaceOrder:', err);
+      setError('An unexpected error occurred. Please try again later.');
     } finally {
       setLoading(false);
     }

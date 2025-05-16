@@ -1,12 +1,15 @@
 import { userApi } from './api';
+import tokenUtils from '../utils/tokenUtils';
+
 const AuthService = {
   login: async (username, password, userType) => {
     try {
       const response = await userApi.post(`/user/login?username=${username}&password=${password}`);
       
       if (response.data.token) {
+        // Use our token utility to store token with expiration
+        tokenUtils.setTokenWithExpiration(response.data.token);
         
-        localStorage.setItem('token', response.data.token);
         const role = response.data.role.toLowerCase();
         localStorage.setItem('userType', role);
         localStorage.setItem('userId', response.data.username);
@@ -36,9 +39,12 @@ const AuthService = {
   },
   logout: () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('tokenExpiration');
     localStorage.removeItem('userType');
     localStorage.removeItem('userId');
     localStorage.removeItem('companyId');
+    // Clear cart data on logout
+    localStorage.removeItem('cart');
   },
   getCurrentUser: () => {
     return {

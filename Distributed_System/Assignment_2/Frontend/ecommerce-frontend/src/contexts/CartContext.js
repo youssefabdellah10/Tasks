@@ -1,4 +1,5 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { AuthContext } from './AuthContext';
 
 export const CartContext = createContext();
 
@@ -6,24 +7,43 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [cartCount, setCartCount] = useState(0);
   const [cartTotal, setCartTotal] = useState(0);
+  const { currentUser } = useContext(AuthContext);
   
-  // Load cart from localStorage on component mount
+  // Load cart from localStorage on component mount and whenever user changes
   useEffect(() => {
-    const storedCart = localStorage.getItem('cart');
+    // If user is not authenticated, clear cart
+    if (!currentUser) {
+      localStorage.removeItem('cart');
+      setCartItems([]);
+      return;
+    }
+    
+    const userId = currentUser.userId;
+    const cartKey = `cart_${userId}`;
+    
+    const storedCart = localStorage.getItem(cartKey);
     if (storedCart) {
       try {
         const parsedCart = JSON.parse(storedCart);
         setCartItems(parsedCart);
       } catch (error) {
         console.error('Error parsing stored cart', error);
-        localStorage.removeItem('cart');
+        localStorage.removeItem(cartKey);
       }
+    } else {
+      // No stored cart for this user, clear cart items
+      setCartItems([]);
     }
-  }, []);
+  }, [currentUser]);
   
   // Save cart to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cartItems));
+    if (!currentUser) return;
+    
+    const userId = currentUser.userId;
+    const cartKey = `cart_${userId}`;
+    
+    localStorage.setItem(cartKey, JSON.stringify(cartItems));
     
     // Update cart count and total
     const count = cartItems.reduce((total, item) => total + item.quantity, 0);
@@ -31,7 +51,7 @@ export const CartProvider = ({ children }) => {
     
     setCartCount(count);
     setCartTotal(price);
-  }, [cartItems]);
+  }, [cartItems, currentUser]);
   
   // Add item to cart
   const addToCart = (item) => {
@@ -77,15 +97,39 @@ export const CartProvider = ({ children }) => {
   // Clear the entire cart
   const clearCart = () => {
     setCartItems([]);
-    localStorage.removeItem('cart');
+    if (currentUser) {
+      const userId = currentUser.userId;
+      localStorage.removeItem(`cart_${userId}`);
+    } else {
+      localStorage.removeItem('cart'); // Remove any legacy cart data
+    }
   };
   
   // Format cart items for order submission
   const getOrderItems = () => {
-    return cartItems.map(item => ({
-      dishId: item.dishId,
-      quantity: item.quantity
-    }));
+    // Validate cart items and ensure they're properly formatted for the backend
+    return cartItems.map(item => {
+      // Make sure dishId and quantity are integers
+      const dishId = parseInt(item.dishId, 10);
+      const quantity = parseInt(item.quantity, 10);
+      
+      // Add validation to ensure we don't send invalid data
+      if (isNaN(dishId)) {
+        console.error(`Invalid dishId in cart item:`, item);
+        throw new Error(`Invalid dishId in cart: ${item.dishId}`);
+      }
+      
+      if (isNaN(quantity) || quantity <= 0) {
+        console.error(`Invalid quantity in cart item:`, item);
+        throw new Error(`Invalid quantity in cart: ${item.quantity}`);
+      }
+      
+      // Return properly formatted item
+      return {
+        dishId,
+        quantity
+      };
+    });
   };
   
   return (

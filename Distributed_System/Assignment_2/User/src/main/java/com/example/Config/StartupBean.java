@@ -8,11 +8,7 @@ import jakarta.inject.Inject;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Singleton startup bean that initializes the companies table
- * when the server starts. This ensures the table is populated
- * exactly once per server startup.
- */
+
 @Singleton
 @Startup
 public class StartupBean {
@@ -22,11 +18,7 @@ public class StartupBean {
     @Inject
     private CompanyService companyService;
     
-    /**
-     * Initialize the database with some companies when the application starts.
-     * This method is called only once when the singleton bean is created.
-     * It only adds companies if the table is empty.
-     */
+    
     @PostConstruct
     public void init() {
         LOGGER.info("Checking if companies need to be initialized...");

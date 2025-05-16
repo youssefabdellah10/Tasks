@@ -63,5 +63,7 @@ public class Order {
     public static double getMinCharge() {
         return MIN_CHARGE;
     } 
-    
+    public void setTotalPrice(double totalPrice) {
+        this.totalPrice = totalPrice;
+}
 }

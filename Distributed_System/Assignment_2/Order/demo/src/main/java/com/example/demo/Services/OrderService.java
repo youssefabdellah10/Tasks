@@ -161,8 +161,17 @@ public class OrderService {
             payment.setCustomerUsername(username);
             paymentRepository.save(payment);
         }
-        try {
-            sender.sendOrder(order);
+        Order savedOrder = orderRepository.save(order);
+        
+        return savedOrder;
+    }
+    @Transactional
+    public boolean ispaid(String token, String orderId) throws Exception {
+        Order order = orderRepository.findByOrderId(orderId);
+        if(order == null) {
+            throw new RuntimeException("Order not found");
+        }
+        sender.sendOrder(order);
             try {
             System.out.println("Sleeping for 3 seconds...");
             Thread.sleep(3000);
@@ -172,17 +181,6 @@ public class OrderService {
         }
             double totalPrice = receiver.receiveStoc();
             order.setTotalPrice(totalPrice);
-           
-        } catch (Exception e) {
-            System.err.println("Failed to send order to message queue: " + e.getMessage());
-            e.printStackTrace();
-        }
-        Order savedOrder = orderRepository.save(order);
-        
-        return savedOrder;
-    }
-    @Transactional
-    public boolean ispaid(String token, String orderId) throws Exception {
         String role = extractRoleFromToken(token);
         if(role == null || !role.equals("CUSTOMER")) {
             throw new RuntimeException("Unauthorized access: Invalid role");
@@ -191,10 +189,8 @@ public class OrderService {
         Payment payment = paymentRepository.findPaymentByCustomerUsername(username);
         if(payment == null) {
             throw new RuntimeException("Payment not found for user: " + username);
-        }        Order order = orderRepository.findByOrderId(orderId);
-        if(order == null) {
-            throw new RuntimeException("Order not found");
-        }
+        }        
+        
         if(!order.getOrderStatus().equals("Pending")) {
             throw new RuntimeException("Order already paid or rejected. Current status: " + order.getOrderStatus());
         }

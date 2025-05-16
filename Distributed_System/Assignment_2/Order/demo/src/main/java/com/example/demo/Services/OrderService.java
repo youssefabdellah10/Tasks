@@ -1,6 +1,7 @@
 package com.example.demo.Services;
 
 import com.example.demo.Models.Order;
+import com.example.demo.Models.OrderItem;
 import com.example.demo.Models.Payment;
 import com.example.demo.Repositories.OrderRepository;
 import com.example.demo.Repositories.PaymentRepository;
@@ -116,15 +117,15 @@ public class OrderService {
         String username = extractUsernameFromToken(token);
         return orderRepository.findByCustomerUsername(username);
     }
-    
-
-    public List<Order> getAllOrders(String token) {
+        public List<Order> getAllOrders(String token) {
         String role = extractRoleFromToken(token);
         if(role == null || !role.equals("ADMIN")) {
             throw new RuntimeException("Unauthorized access: Admin role required");
         }
         return orderRepository.findAll();
-    }     public Order createdOrder(List<Integer> dishIds, String token) {
+    }     
+    
+    public Order createdOrder(List<OrderItem> orderItems, String token) {
         String role = extractRoleFromToken(token);
         if(role == null || !role.equals("CUSTOMER")) {
             throw new RuntimeException("Unauthorized access: Invalid role");
@@ -132,9 +133,26 @@ public class OrderService {
         String username = extractUsernameFromToken(token);
         Order order = new Order();
         order.setCustomerUsername(username);
-        for(int dishId : dishIds) {
-            order.addDish(dishId);
+        
+        // Add each dish with its quantity (will add the same dishId multiple times based on quantity)
+        for(OrderItem item : orderItems) {
+            Integer dishId = item.getDishId();
+            Integer quantity = item.getQuantity();
+            
+            if (dishId == null) {
+                throw new RuntimeException("Invalid request: dishId cannot be null");
+            }
+            
+            if (quantity == null || quantity <= 0) {
+                throw new RuntimeException("Invalid request: quantity must be a positive number");
+            }
+            
+            // Add the dishId multiple times based on quantity
+            for (int i = 0; i < quantity; i++) {
+                order.addDish(dishId);
+            }
         }
+        
         if(paymentRepository.findPaymentByCustomerUsername(username) == null) {
             Payment payment = new Payment();
             payment.setCustomerUsername(username);

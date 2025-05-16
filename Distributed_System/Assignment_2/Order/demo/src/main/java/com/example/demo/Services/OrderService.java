@@ -198,18 +198,21 @@ public class OrderService {
             order.setorderStatus("rejected");
             orderRepository.save(order);
             sender.sendOrderStatus(order);
+            sender.sendOrderNotification(order);
              return false;
         }
         if(order.getTotalPrice() < Order.getMinCharge()){
             order.setorderStatus("rejected");
             orderRepository.save(order);
             sender.sendOrderStatus(order);
+            sender.sendOrderNotification(order);
              return false;
         }
         payment.setBalance(payment.getBalance() - order.getTotalPrice());
         order.setorderStatus("completed");
         orderRepository.save(order);
         sender.sendOrderStatus(order);
+        sender.sendOrderNotification(order);
         paymentRepository.save(payment);
         return true;
     }

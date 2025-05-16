@@ -42,7 +42,6 @@ const CustomerOrders = () => {  const { currentUser } = useContext(AuthContext);
       ));
     } catch (err) {
       console.error('Error cancelling order:', err);
-      // Silently handle the error without displaying an error message
     }
   };
 
@@ -147,8 +146,6 @@ const CustomerOrders = () => {  const { currentUser } = useContext(AuthContext);
             </Card.Body>
           </Card>
         )}
-        
-        {/* Order Details Modal */}
         <Modal 
           show={showOrderDetails} 
           onHide={() => setShowOrderDetails(false)}

@@ -28,10 +28,11 @@ const connectRabbitMQ = async () => {
     await channel.assertQueue(ORDER_DETAILS_QUEUE, {
       durable: true
     });
-    await channel.bindQueue(ORDER_DETAILS_QUEUE, ORDER_EXCHANGE, ORDER_ROUTING_KEY);e
-    await consumeOrderDetails();
+    await channel.bindQueue(ORDER_DETAILS_QUEUE, ORDER_EXCHANGE, ORDER_ROUTING_KEY);
+    console.log('Channel setup complete, ready to consume messages');
     
-    console.log('Connected to RabbitMQ');
+    console.log('Connected to RabbitMQ')
+    await consumeOrderDetails();
     
     return channel;
   } catch (error) {
@@ -43,7 +44,7 @@ const connectRabbitMQ = async () => {
 
 const consumeOrderDetails = async () => {
   if (!channel) {
-    await connectRabbitMQ();
+    console.log('No channel available for consuming messages');
     return;
   }
   
@@ -92,7 +93,6 @@ const consumeOrderDetails = async () => {
           if (allAvailable) {
             console.log(`Order ${orderId} is valid. Total price: ${totalPrice}`);
             await sendNumberToQueue(totalPrice);
-            await updateDishStock(dishIds);
           } else {
             console.log(`Order ${orderId} cannot be fulfilled due to stock issues`);
             await sendNumberToQueue(-1);
@@ -137,7 +137,6 @@ connectRabbitMQ();
 module.exports = {
   connectRabbitMQ,
   sendNumberToQueue,
-  updateDishStock,
   DISH_STOCK_QUEUE,
   ORDER_EXCHANGE,
   ORDER_DETAILS_QUEUE,

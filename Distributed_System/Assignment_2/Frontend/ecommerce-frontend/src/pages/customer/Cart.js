@@ -15,8 +15,6 @@ const Cart = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
-  
-  // Place order function
   const handlePlaceOrder = async () => {
     try {
       if (cartItems.length === 0) {
@@ -26,18 +24,10 @@ const Cart = () => {
       
       setLoading(true);
       setError('');
-      
-      // Format order items as expected by the API
       const orderItems = getOrderItems();
-      
-      // Send order to the backend
       const response = await OrderService.placeOrder(orderItems);
-      
-      // On success, clear the cart and show success message
       clearCart();
       setSuccess('Order placed successfully! Redirecting to your orders...');
-      
-      // Redirect to orders page after a delay
       setTimeout(() => {
         navigate('/customer/orders');
       }, 2000);
@@ -50,7 +40,6 @@ const Cart = () => {
   };
   
   const handleQuantityChange = (dishId, newQuantity) => {
-    // Convert input to integer
     const quantity = parseInt(newQuantity, 10);
     if (!isNaN(quantity)) {
       updateQuantity(dishId, quantity);

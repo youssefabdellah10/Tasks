@@ -5,6 +5,7 @@ import com.example.demo.Models.OrderItem;
 import com.example.demo.Models.Payment;
 import com.example.demo.Repositories.OrderRepository;
 import com.example.demo.Repositories.PaymentRepository;
+import com.example.demo.Receiver;
 import com.example.demo.Sender;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ public class OrderService {
     private final OrderRepository orderRepository; 
     private final PaymentRepository paymentRepository;
     private final Sender sender;
+    private final Receiver receiver;
    
     @Value("${jwt.secret}")
     private String secretKey;
@@ -32,10 +34,12 @@ public class OrderService {
     @Autowired
     public OrderService(OrderRepository orderRepository,
                     PaymentRepository paymentRepository,
-                    Sender sender) {
+                    Sender sender,
+                    Receiver receiver) {
         this.orderRepository = orderRepository;
         this.paymentRepository = paymentRepository;
         this.sender = sender;
+        this.receiver = receiver;
     }
    
   
@@ -133,8 +137,6 @@ public class OrderService {
         String username = extractUsernameFromToken(token);
         Order order = new Order();
         order.setCustomerUsername(username);
-        
-        // Add each dish with its quantity (will add the same dishId multiple times based on quantity)
         for(OrderItem item : orderItems) {
             Integer dishId = item.getDishId();
             Integer quantity = item.getQuantity();
@@ -147,7 +149,6 @@ public class OrderService {
                 throw new RuntimeException("Invalid request: quantity must be a positive number");
             }
             
-            // Add the dishId multiple times based on quantity
             for (int i = 0; i < quantity; i++) {
                 order.addDish(dishId);
             }
@@ -159,14 +160,25 @@ public class OrderService {
             paymentRepository.save(payment);
         }
         
-        Order savedOrder = orderRepository.save(order);
+        
         
         try {
-            sender.sendOrder(savedOrder);
+            sender.sendOrder(order);
+            try {
+            System.out.println("Sleeping for 3 seconds...");
+            Thread.sleep(3000);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            System.err.println("Sleep interrupted: " + ie.getMessage());
+        }
+            double totalPrice = receiver.receiveStoc();
+            order.setTotalPrice(totalPrice);
+           
         } catch (Exception e) {
             System.err.println("Failed to send order to message queue: " + e.getMessage());
             e.printStackTrace();
         }
+        Order savedOrder = orderRepository.save(order);
         
         return savedOrder;
     }

@@ -4,6 +4,7 @@ import com.example.demo.Models.Order;
 import com.example.demo.Models.Payment;
 import com.example.demo.Repositories.OrderRepository;
 import com.example.demo.Repositories.PaymentRepository;
+import com.example.demo.Sender;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,20 +20,21 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 
 @Service
-public class OrderService {
-
+public class OrderService {    
     private final OrderRepository orderRepository; 
-    private final PaymentRepository paymentRepository;   
+    private final PaymentRepository paymentRepository;
+    private final Sender sender;
    
     @Value("${jwt.secret}")
     private String secretKey;
 
     @Autowired
     public OrderService(OrderRepository orderRepository,
-                       
-                     PaymentRepository paymentRepository) {
+                    PaymentRepository paymentRepository,
+                    Sender sender) {
         this.orderRepository = orderRepository;
         this.paymentRepository = paymentRepository;
+        this.sender = sender;
     }
    
   
@@ -122,8 +124,7 @@ public class OrderService {
             throw new RuntimeException("Unauthorized access: Admin role required");
         }
         return orderRepository.findAll();
-    }
-
+    }   
     public void createdOrder(List<Integer> dishIds, String token) {
         String role = extractRoleFromToken(token);
         if(role == null || !role.equals("CUSTOMER")) {
@@ -140,7 +141,15 @@ public class OrderService {
             payment.setCustomerUsername(username);
             paymentRepository.save(payment);
         }
-        orderRepository.save(order);
+        
+        Order savedOrder = orderRepository.save(order);
+        
+        try {
+            sender.sendOrder(savedOrder);
+        } catch (Exception e) {
+            System.err.println("Failed to send order to message queue: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
 }

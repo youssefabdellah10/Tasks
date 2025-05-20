@@ -169,6 +169,16 @@ public class OrderService {
         if(order == null) {
             throw new RuntimeException("Order not found");
         }
+        sender.sendOrder(order);
+            try {
+            System.out.println("Sleeping for 3 seconds...");
+            Thread.sleep(3000);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            System.err.println("Sleep interrupted: " + ie.getMessage());
+        }
+            double totalPrice = receiver.receiveStoc();
+            order.setTotalPrice(totalPrice);
         String role = extractRoleFromToken(token);
         if(role == null || !role.equals("CUSTOMER")) {
             throw new RuntimeException("Unauthorized access: Invalid role");
@@ -182,26 +192,29 @@ public class OrderService {
         if(!order.getOrderStatus().equals("Pending")) {
             throw new RuntimeException("Order already paid or rejected. Current status: " + order.getOrderStatus());
         }        if(order.getTotalPrice() > payment.getBalance() ) {
-            order.setorderStatus("rejected as not enough balance");
+            order.setorderStatus("rejected");
             orderRepository.save(order);
             sender.sendOrderStatus(order);
             // Send notification with reason for payment failure
-            sender.sendOrderNotification(order);
+            String reason = "Insufficient balance. Required: $" + order.getTotalPrice() + ", Available: $" + payment.getBalance();
+            sender.sendOrderNotification(order, reason);
             return false;
         }
         if(order.getTotalPrice() < Order.getMinCharge()){
-            order.setorderStatus("rejected as minimum charge not met");
+            order.setorderStatus("rejected");
             orderRepository.save(order);
             sender.sendOrderStatus(order);
             // Send notification with reason for minimum charge requirement
-            sender.sendOrderNotification(order);
+            String reason = "Order amount ($" + order.getTotalPrice() + ") is below the minimum required charge of $" + Order.getMinCharge();
+            sender.sendOrderNotification(order, reason);
             return false;
         }        payment.setBalance(payment.getBalance() - order.getTotalPrice());
-        order.setorderStatus("completed, paid successfully");
+        order.setorderStatus("completed");
         orderRepository.save(order);
         sender.sendOrderStatus(order);
         // Send notification with successful payment message
-        sender.sendOrderNotification(order);       
+        String successMessage = "Payment successful. Amount: $" + order.getTotalPrice();
+        sender.sendOrderNotification(order, successMessage);       
         paymentRepository.save(payment);
         return true;
     }
@@ -218,32 +231,4 @@ public class OrderService {
         }
         return payment.getBalance();
     }
-    public boolean ismetMinCharge(String orderId) {
-        Order order = orderRepository.findByOrderId(orderId);
-        if(order == null) {
-            throw new RuntimeException("Order not found");
-        }
-        try{
-         sender.sendOrder(order);
-            try {
-            System.out.println("Sleeping for 3 seconds...");
-            Thread.sleep(3000);
-        } catch (InterruptedException ie) {
-            Thread.currentThread().interrupt();
-            System.err.println("Sleep interrupted: " + ie.getMessage());
-        }
-            double totalPrice = receiver.receiveStoc();
-            order.setTotalPrice(totalPrice);
-             orderRepository.save(order);
-    }
-    catch(Exception e) {
-        throw new RuntimeException("Error in order price calculation: " + e.getMessage());
-    }
-      if(order.getTotalPrice() < Order.getMinCharge()){
-            order.setorderStatus("rejected as minimum charge not met");
-            orderRepository.save(order);
-            return false;
-        }
-        return true;
-    }
-    }
+}

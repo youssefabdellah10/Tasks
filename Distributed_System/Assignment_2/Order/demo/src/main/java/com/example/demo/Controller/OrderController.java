@@ -54,15 +54,11 @@ public class OrderController {
     public ResponseEntity<?> payOrder(@QueryParam("orderId") String orderId, 
                                         @RequestHeader("Authorization") String token) {
         try {
-            boolean ismetMinCharge = orderService.ismetMinCharge(orderId);
-            if(!ismetMinCharge){
-                return ResponseEntity.status(400).body("Order is not met minimum charge");
-            }
             boolean isPaid = orderService.ispaid(token, orderId);
             if(isPaid){
                return ResponseEntity.ok("Order is paid successfully");
             } else {
-                return ResponseEntity.status(400).body("faield to pay , please charge your balance and try again!"); 
+                return ResponseEntity.status(400).body("faield to pay"); 
             }
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error processing payment: " + e.getMessage());

@@ -76,11 +76,8 @@ public class Sender {
             channel.basicPublish(EXCHANGE_NAME, ORDER_STATUS_ROUTING_KEY, null, message.getBytes());
             System.out.println(" [x] Sent order status update for order '" + order.getOrderId()+ "' to topic exchange");
         }
-    }       public void sendOrderNotification(Order order) throws Exception {
-        sendOrderNotification(order, null);
-    }
-    
-    public void sendOrderNotification(Order order, String reason) throws Exception {
+    }     
+    public void sendOrderNotification(Order order) throws Exception {
         if (order == null) {
             System.err.println("Cannot send notification for null order");
             return;
@@ -103,27 +100,17 @@ public class Sender {
             // Bind the queue to the exchange
             channel.queueBind(ORDER_noti_QUEUE_NAME, EXCHANGE_NAME, ORDER_noti_ROUTING_KEY);
             System.out.println("Queue bound to exchange with routing key: " + ORDER_noti_ROUTING_KEY);
-        
-            ObjectMapper objectMapper = new ObjectMapper();
-            java.util.Map<String, Object> messageData;
             
-            if (reason != null && !reason.isEmpty()) {
-                messageData = new java.util.HashMap<>();
-                messageData.put("orderId", order.getOrderId());
-                messageData.put("status", order.getOrderStatus());
-                messageData.put("Customer Name:", order.getCustomerUsername());
-                messageData.put("timestamp", System.currentTimeMillis());
-                messageData.put("reason", reason); 
-            } else {
-                messageData = java.util.Map.of(
+            // Create an order notification message (JSON)
+            ObjectMapper objectMapper = new ObjectMapper();
+            String message = objectMapper.writeValueAsString(
+                java.util.Map.of(
                     "orderId", order.getOrderId(),
                     "status", order.getOrderStatus(), 
                     "Customer Name:", order.getCustomerUsername(),
                     "timestamp", System.currentTimeMillis()
-                );
-            }
-            
-            String message = objectMapper.writeValueAsString(messageData);
+                )
+            );
             
             channel.basicPublish(EXCHANGE_NAME, ORDER_noti_ROUTING_KEY, null, message.getBytes());
             System.out.println(" [x] Sent order notification for order '" + order.getOrderId()+ "' to topic exchange");

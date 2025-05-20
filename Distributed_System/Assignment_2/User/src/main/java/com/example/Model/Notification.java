@@ -15,12 +15,9 @@ public class Notification {
     
     @Column(name = "order_id", nullable = false)
     private String orderId;
-      @Column(name = "order_status", nullable = false)
+    
+    @Column(name = "order_status", nullable = false)
     private String status;
-    
-    @Column(name = "reason")
-    private String reason;
-    
     @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;
     
@@ -32,14 +29,6 @@ public class Notification {
         this.customer = customer;
         this.orderId = orderId;
         this.status = status;
-        this.timestamp = LocalDateTime.now();
-    }
-    
-    public Notification(Customer customer, String orderId, String status, String reason) {
-        this.customer = customer;
-        this.orderId = orderId;
-        this.status = status;
-        this.reason = reason;
         this.timestamp = LocalDateTime.now();
     }
     
@@ -69,16 +58,10 @@ public class Notification {
 
     public String getStatus() {
         return status;
-    }    public void setStatus(String status) {
+    }
+
+    public void setStatus(String status) {
         this.status = status;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public void setReason(String reason) {
-        this.reason = reason;
     }
 
     public LocalDateTime getTimestamp() {

@@ -1,10 +1,13 @@
-import React, { useContext, useState } from 'react';
-import { Button, Table, Card, Container, Form, InputGroup, Alert, Row, Col } from 'react-bootstrap';
+import React, { useContext, useState } from "react";
+import {
+  Button, Table, Card, Container, Form, InputGroup, Alert, Row, Col
+} from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faPlus, faMinus, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 import CartContext from '../../contexts/CartContext';
 import OrderService from '../../services/order.service';
+import DishService from '../../services/dish.service';
 import AuthContext from '../../contexts/AuthContext';
 import MainLayout from '../../layouts/MainLayout';
 
@@ -48,8 +51,28 @@ const Cart = () => {
         console.log('Token used for authentication:', token.substring(0, 10) + '...');
         console.log('Sending order request to API endpoint:', OrderService.getBaseUrl() + '/orders/placeorder');
         
-        // Show more detailed logging during order placement
         try {
+          // Check stock availability before placing the order
+          const stockCheckResult = await DishService.checkDishStock(orderItems);
+          console.log('Stock check result:', stockCheckResult);
+          
+          // If not all items are available in stock, show detailed error message and stop
+          if (!stockCheckResult.allAvailable) {
+            const unavailableItems = stockCheckResult.stockResults.filter(
+              (item) => !item.available
+            );
+            const errorMessages = unavailableItems
+              .map(
+                (item) => `${item.name || `Dish ${item.dishId}`}: Only ${item.availableQuantity} available`
+              )
+              .join(', ');
+            setError(`Some items are out of stock: ${errorMessages}`);
+            setLoading(false);
+            return;
+          }
+          
+          // Proceed with order placement if stock is available
+          console.log('All items in stock, placing order...');
           console.log('About to call OrderService.placeOrder with items:', JSON.stringify(orderItems));
           const response = await OrderService.placeOrder(orderItems);
           console.log('Order placed successfully:', response);
@@ -88,9 +111,6 @@ const Cart = () => {
           console.error('No response received:', apiError.request);
           errorMsg = 'Network error: The server is not responding. Please try again later.';
         } else if (apiError.message) {
-          errorMsg = apiError.message;
-        }
-        else if (apiError.message) {
           errorMsg = apiError.message;
         }
         

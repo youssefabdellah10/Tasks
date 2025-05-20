@@ -94,9 +94,7 @@ export const AuthProvider = ({ children }) => {
       setIsLoading(false);
       throw error;
     }
-  };
-
-  // Register user
+  };  // Register user
   const register = async (username, password, customer_name, address, mobile_number) => {
     try {
       setError(null);

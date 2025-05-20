@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { Table, Button, Modal, Form, Alert } from 'react-bootstrap';
+import { Table, Button, Modal, Form, Alert, Badge, InputGroup } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faPlus, faSync } from '@fortawesome/free-solid-svg-icons';
 import DishService from '../../services/dish.service';
 import AuthContext from '../../contexts/AuthContext';
 import MainLayout from '../../layouts/MainLayout';
@@ -28,6 +28,8 @@ const SellerDishes = () => {
   const [stock, setStock] = useState('100');
   const [image, setImage] = useState('');
   const [formError, setFormError] = useState('');
+  
+  const [quickStockEdit, setQuickStockEdit] = useState({ dishId: null, stock: '' });
   
   // Extract fetchDishes as a separate named function with useCallback
   const fetchDishes = useCallback(async () => {
@@ -159,6 +161,28 @@ const SellerDishes = () => {
     }
   };
   
+  const handleQuickStockUpdate = (dish) => {
+    setQuickStockEdit({ dishId: dish.id, stock: dish.stock.toString() });
+  };
+
+  const saveStockUpdate = async () => {
+    if (!quickStockEdit.dishId) return;
+    
+    const stockValue = parseInt(quickStockEdit.stock, 10);
+    if (isNaN(stockValue) || stockValue < 0) {
+      setError('Stock must be a non-negative number');
+      return;
+    }
+    
+    try {
+      await DishService.updateStock(quickStockEdit.dishId, stockValue);
+      setQuickStockEdit({ dishId: null, stock: '' });
+      fetchDishes();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to update stock');
+    }
+  };
+  
   if (loading) {
     return (
       <MainLayout>
@@ -173,8 +197,25 @@ const SellerDishes = () => {
   
   return (
     <MainLayout>
+      <div className="mb-4">
+        <h2 className="mb-1">Seller Portal</h2>
+        <p className="text-muted">Manage your menu items and dish inventory</p>
+      </div>
+      
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>My Dishes</h2>
+        <div className="d-flex align-items-center">
+          <Button 
+            variant="outline-secondary" 
+            size="sm"
+            onClick={fetchDishes}
+            className="me-2"
+          >
+            <FontAwesomeIcon icon={faSync} className="me-1" /> Refresh
+          </Button>
+          {dishes.length > 0 && (
+            <span className="text-muted small">{dishes.length} dish{dishes.length !== 1 ? 'es' : ''} in your menu</span>
+          )}
+        </div>
         <Button variant="success" onClick={openAddModal}>
           <FontAwesomeIcon icon={faPlus} className="me-2" />
           Add New Dish
@@ -183,9 +224,19 @@ const SellerDishes = () => {
       
       {error && <Alert variant="danger">{error}</Alert>}
       
-      {dishes.length === 0 ? (
-        <Alert variant="info">
-          You haven't added any dishes yet. Click the "Add New Dish" button to get started.
+      {dishes.length === 0 ? (        <Alert variant="info">
+          <div className="text-center py-4">
+            <h4>Welcome to your Seller Portal!</h4>
+            <p>You haven't added any dishes yet. Click the "Add New Dish" button to get started.</p>
+            <Button 
+              variant="success" 
+              onClick={openAddModal}
+              className="mt-2"
+            >
+              <FontAwesomeIcon icon={faPlus} className="me-2" />
+              Add Your First Dish
+            </Button>
+          </div>
         </Alert>
       ) : (
         <Table responsive striped hover>
@@ -208,15 +259,26 @@ const SellerDishes = () => {
                   {dish.description.length > 50
                     ? `${dish.description.substring(0, 50)}...`
                     : dish.description}
+                </td>                <td>${dish.price.toFixed(2)}</td>                <td>
+                  <Badge bg={dish.stock > 10 ? "success" : dish.stock > 0 ? "warning" : "danger"}>
+                    {dish.stock > 0 ? dish.stock : 'Out of stock'}
+                  </Badge>
                 </td>
-                <td>${dish.price.toFixed(2)}</td>
-                <td>{dish.stock || 'N/A'}</td>
-                <td>                  <Button
+                <td>
+                  <Button
                     variant="outline-primary"
                     size="sm"
+                    className="me-2"
                     onClick={() => openEditModal(dish)}
                   >
                     <FontAwesomeIcon icon={faEdit} />
+                  </Button>
+                  <Button
+                    variant="outline-success"
+                    size="sm"
+                    onClick={() => handleQuickStockUpdate(dish)}
+                  >
+                    <FontAwesomeIcon icon={faSync} />
                   </Button>
                 </td>
               </tr>
@@ -299,6 +361,36 @@ const SellerDishes = () => {
           </Button>
           <Button variant="primary" onClick={handleSubmit}>
             Save
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      
+      {/* Stock Update Modal */}
+      <Modal show={quickStockEdit.dishId !== null} onHide={() => setQuickStockEdit({ dishId: null, stock: '' })}>
+        <Modal.Header closeButton>
+          <Modal.Title>Update Stock</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3" controlId="stockUpdate">
+              <Form.Label>Stock Quantity</Form.Label>
+              <Form.Control
+                type="number"
+                min="0"
+                placeholder="Enter available stock quantity"
+                value={quickStockEdit.stock}
+                onChange={(e) => setQuickStockEdit({...quickStockEdit, stock: e.target.value})}
+                required
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setQuickStockEdit({ dishId: null, stock: '' })}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={saveStockUpdate}>
+            Update Stock
           </Button>
         </Modal.Footer>
       </Modal>

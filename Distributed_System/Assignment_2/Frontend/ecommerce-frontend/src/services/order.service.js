@@ -129,14 +129,24 @@ const OrderService = {
       throw error;
     }
   },
-  
-  getSellerOrders: async (sellerId) => {
+    getSellerOrders: async (sellerId) => {
     try {
       const response = await orderApi.get(`/orders/seller/${sellerId}`);
       return response.data.orders || response.data || [];
     } catch (error) {
       console.error('Error in getSellerOrders:', error);
       return [];
+    }
+  },
+  
+  getCustomerBalance: async () => {
+    try {
+      const response = await orderApi.get('/orders/mybalance');
+      console.log('Balance API response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching customer balance:', error);
+      throw error;
     }
   }
 };

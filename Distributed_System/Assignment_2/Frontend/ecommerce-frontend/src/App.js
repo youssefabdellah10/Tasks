@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './contexts/AuthContext';
 import AuthContext from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import PrivateRoute from './components/common/PrivateRoute';
 
 // Auth Pages
@@ -17,8 +18,6 @@ import CompanyDishes from './pages/customer/CompanyDishes';
 
 // Seller Pages
 import SellerDishes from './pages/seller/SellerDishes';
-import SellerDashboard from './pages/seller/Dashboard';
-import SellerOrderManagement from './pages/seller/OrderManagement';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/Dashboard';
@@ -32,11 +31,11 @@ import UserProfile from './pages/common/UserProfile';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
-function App() {
-  return (
+function App() {  return (
     <AuthProvider>
       <CartProvider>
-        <Router>
+        <NotificationProvider>
+          <Router>
           <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
@@ -77,31 +76,12 @@ function App() {
                 />
               } 
             />
-            
-            {/* Seller Routes */}
-            <Route 
-              path="/seller/dashboard" 
-              element={
-                <PrivateRoute 
-                  component={SellerDashboard} 
-                  requiredUserType={['seller']} 
-                />
-              } 
-            />
+              {/* Seller Routes */}
             <Route 
               path="/seller/dishes" 
               element={
                 <PrivateRoute 
                   component={SellerDishes} 
-                  requiredUserType={['seller']} 
-                />
-              } 
-            />
-            <Route 
-              path="/seller/orders" 
-              element={
-                <PrivateRoute 
-                  component={SellerOrderManagement} 
                   requiredUserType={['seller']} 
                 />
               } 
@@ -149,9 +129,10 @@ function App() {
             />
             
             {/* Default Routes */}
-            <Route path="/" element={<DefaultRedirect />} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>        </Router>
+            <Route path="/" element={<DefaultRedirect />} />            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </Router>
+      </NotificationProvider>
       </CartProvider>
     </AuthProvider>
   );
@@ -164,12 +145,11 @@ const DefaultRedirect = () => {
   if (!currentUser) {
     return <Navigate to="/login" replace />;
   }
-  
-  switch (currentUser.userType) {
+    switch (currentUser.userType) {
     case 'admin':
       return <Navigate to="/admin/dashboard" replace />;
     case 'seller':
-      return <Navigate to="/seller/dashboard" replace />;
+      return <Navigate to="/seller/dishes" replace />;
     case 'customer':
       return <Navigate to="/customer/dishes" replace />;
     default:

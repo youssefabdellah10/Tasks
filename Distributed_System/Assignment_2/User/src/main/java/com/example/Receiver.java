@@ -82,9 +82,7 @@ public class Receiver {    private static final String EXCHANGE_NAME = "order_ex
             e.printStackTrace();
             throw new RuntimeException("Failed to connect to message queue", e);
         }
-    }
-
-    public Notification parseMessageToNotification(String jsonMessage) throws Exception {
+    }    public Notification parseMessageToNotification(String jsonMessage) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> orderData = objectMapper.readValue(jsonMessage, 
                 objectMapper.getTypeFactory().constructMapType(Map.class, String.class, Object.class));
@@ -93,6 +91,7 @@ public class Receiver {    private static final String EXCHANGE_NAME = "order_ex
         String status = (String) orderData.get("status");
         String customerUsername = (String) orderData.get("Customer Name:");
         Long timestamp = (Long) orderData.get("timestamp");
+        String reason = (String) orderData.get("reason"); // Extract the reason field
   
         Customer customer = customerRepo.findCustomerByUsername(customerUsername);
         
@@ -100,7 +99,13 @@ public class Receiver {    private static final String EXCHANGE_NAME = "order_ex
             throw new IllegalStateException("Customer not found: " + customerUsername);
         }
         
-        Notification notification = new Notification(customer, orderId, status);
+        Notification notification;
+        if (reason != null && !reason.isEmpty()) {
+            notification = new Notification(customer, orderId, status, reason);
+            System.out.println("Processing notification with reason: " + reason);
+        } else {
+            notification = new Notification(customer, orderId, status);
+        }
         
         if (timestamp != null) {
             LocalDateTime messageTime = LocalDateTime.ofInstant(

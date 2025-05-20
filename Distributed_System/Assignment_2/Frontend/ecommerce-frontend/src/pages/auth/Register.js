@@ -11,15 +11,12 @@ const Register = () => {
   const [customer_name, setCustomerName] = useState('');
   const [mobile_number, setMobileNumber] = useState('');
   const [address, setAddress] = useState('');
-  
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   
   const { register } = useContext(AuthContext);
-  const navigate = useNavigate();
-
-  const handleSubmit = async (e) => {
+  const navigate = useNavigate();  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validate passwords match
@@ -28,8 +25,8 @@ const Register = () => {
     }
     
     // Additional validation
-    if (password.length < 6) {
-      return setError('Password must be at least 6 characters');
+    if (password.length < 4 ) {
+      return setError('Password must be at least 4 characters');
     }
     
     try {
@@ -57,8 +54,7 @@ const Register = () => {
             <h2 className="text-center mb-4">Register</h2>
             {error && <Alert variant="danger">{error}</Alert>}
             {successMessage && <Alert variant="success">{successMessage}</Alert>}
-            
-            <Form onSubmit={handleSubmit}>
+              <Form onSubmit={handleSubmit}>
               <Row>
                 <Col md={6}>
                   <Form.Group className="mb-3" controlId="formCustomerName">

@@ -12,8 +12,8 @@ const CustomerOrders = () => {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentError, setPaymentError] = useState('');
   const [paymentSuccess, setPaymentSuccess] = useState('');
+  const [customerBalance, setCustomerBalance] = useState(null);
   const navigate = useNavigate();
-
   useEffect(() => {
     const fetchOrders = async () => {
       try {
@@ -26,6 +26,15 @@ const CustomerOrders = () => {
         });
         
         setOrders(processedOrders);
+        
+        // Fetch customer balance
+        try {
+          const balanceResponse = await OrderService.getCustomerBalance();
+          setCustomerBalance(balanceResponse);
+        } catch (balanceErr) {
+          console.error('Error fetching balance:', balanceErr);
+        }
+        
         setLoading(false);
       } catch (err) {
         console.error('Error fetching orders:', err);
@@ -37,7 +46,6 @@ const CustomerOrders = () => {
       fetchOrders();
     }
   }, [currentUser]);
-
   const handlePayOrder = async (orderId) => {
     try {
       setPaymentLoading(true);
@@ -59,6 +67,14 @@ const CustomerOrders = () => {
         }
         return order;
       }));
+      
+      // Refresh the customer balance
+      try {
+        const balanceResponse = await OrderService.getCustomerBalance();
+        setCustomerBalance(balanceResponse);
+      } catch (balanceErr) {
+        console.error('Error refreshing balance after payment:', balanceErr);
+      }
       
       setPaymentSuccess('Payment successful!');
     } catch (err) {
@@ -97,11 +113,20 @@ const CustomerOrders = () => {
       </MainLayout>
     );
   }
-
   return (
     <MainLayout>
       <Container>
-        <h2 className="mb-4">My Orders</h2>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h2>My Orders</h2>
+          {customerBalance !== null && (
+            <Card className="text-center shadow-sm" style={{ width: '250px' }}>
+              <Card.Body>
+                <h5 className="mb-0">My Balance</h5>
+                <h3 className="text-primary">${customerBalance.toFixed(2)}</h3>
+              </Card.Body>
+            </Card>
+          )}
+        </div>
         
         {paymentError && (
           <Alert variant="danger" dismissible onClose={() => setPaymentError('')}>

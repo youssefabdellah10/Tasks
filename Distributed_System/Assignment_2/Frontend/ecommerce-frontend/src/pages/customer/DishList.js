@@ -8,7 +8,8 @@ import CartContext from '../../contexts/CartContext';
 import MainLayout from '../../layouts/MainLayout';
 import { useNavigate, Link } from 'react-router-dom';
 
-const DishList = () => {  const [dishes, setDishes] = useState([]);
+const DishList = () => {
+  const [dishes, setDishes] = useState([]);
   const [allDishes, setAllDishes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -18,12 +19,15 @@ const DishList = () => {  const [dishes, setDishes] = useState([]);
   const { currentUser } = useContext(AuthContext);
   const { addToCart } = useContext(CartContext);
   const navigate = useNavigate();
+
   useEffect(() => {
     if (!currentUser) {
       console.log('No user detected in DishList, redirecting to login');
       navigate('/login');
     }
-  }, [currentUser, navigate]);  useEffect(() => {
+  }, [currentUser, navigate]);
+
+  useEffect(() => {
     const fetchAllDishes = async () => {
       try {
         setLoading(true);
@@ -51,6 +55,7 @@ const DishList = () => {  const [dishes, setDishes] = useState([]);
     
     fetchAllDishes();
   }, [currentUser]);
+
   useEffect(() => {
     const performSearch = async () => {
       if (!searchTerm.trim()) {
@@ -80,8 +85,10 @@ const DishList = () => {  const [dishes, setDishes] = useState([]);
       </MainLayout>
     );
   }
-    return (
-    <MainLayout>      <h2 className="mb-4">Available Dishes</h2>
+
+  return (
+    <MainLayout>      
+      <h2 className="mb-4">Available Dishes</h2>
       
       {companies.length > 0 && (
         <div className="mb-4">
@@ -98,7 +105,7 @@ const DishList = () => {  const [dishes, setDishes] = useState([]);
           </Form.Select>
         </div>
       )}
-      
+
       <Form className="mb-4">
         <InputGroup>
           <InputGroup.Text>
@@ -137,12 +144,15 @@ const DishList = () => {  const [dishes, setDishes] = useState([]);
                     </h5>
                   </div>
                   {dish.category && (
-                    <Badge bg="info" className="mb-2">{dish.category}</Badge>
+                    <Badge bg="info" className="mb-2 me-2">{dish.category}</Badge>
                   )}
+                  {/* Display stock quantity */}
+                  <Badge bg="secondary" className="mb-2">Stock: {dish.stock !== undefined ? dish.stock : 'N/A'}</Badge>
                   <Card.Text>
                     {dish.description}
                   </Card.Text>
-                  <div className="mt-3 border-top pt-2">                    <Card.Text className="text-muted mb-1">
+                  <div className="mt-3 border-top pt-2">
+                    <Card.Text className="text-muted mb-1">
                       <small><strong>Seller:</strong> {dish.sellerusername || 'N/A'}</small>
                     </Card.Text>
                     <Card.Text className="text-muted">
@@ -154,7 +164,8 @@ const DishList = () => {  const [dishes, setDishes] = useState([]);
                         ) : 'N/A'}
                       </small>
                     </Card.Text>
-                  </div>                </Card.Body>
+                  </div>
+                </Card.Body>
                 <Card.Footer className="bg-white border-top-0">
                   <Button 
                     variant="success" 

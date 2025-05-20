@@ -49,8 +49,6 @@ public class OrderService {
         if (token == null || token.isEmpty()) {
             throw new IllegalArgumentException("Token cannot be null or empty");
         }
-        
-        // Clean up token format by ensuring proper Bearer format
         token = token.trim();
         if (token.startsWith("Bearer ")) {
             token = token.substring(7).trim();
@@ -193,28 +191,44 @@ public class OrderService {
         
         if(!order.getOrderStatus().equals("Pending")) {
             throw new RuntimeException("Order already paid or rejected. Current status: " + order.getOrderStatus());
-        }
-        if(order.getTotalPrice() > payment.getBalance() ) {
+        }        if(order.getTotalPrice() > payment.getBalance() ) {
             order.setorderStatus("rejected");
             orderRepository.save(order);
             sender.sendOrderStatus(order);
-            sender.sendOrderNotification(order);
-             return false;
+            // Send notification with reason for payment failure
+            String reason = "Insufficient balance. Required: $" + order.getTotalPrice() + ", Available: $" + payment.getBalance();
+            sender.sendOrderNotification(order, reason);
+            return false;
         }
         if(order.getTotalPrice() < Order.getMinCharge()){
             order.setorderStatus("rejected");
             orderRepository.save(order);
             sender.sendOrderStatus(order);
-            sender.sendOrderNotification(order);
-             return false;
-        }
-        payment.setBalance(payment.getBalance() - order.getTotalPrice());
+            // Send notification with reason for minimum charge requirement
+            String reason = "Order amount ($" + order.getTotalPrice() + ") is below the minimum required charge of $" + Order.getMinCharge();
+            sender.sendOrderNotification(order, reason);
+            return false;
+        }        payment.setBalance(payment.getBalance() - order.getTotalPrice());
         order.setorderStatus("completed");
         orderRepository.save(order);
         sender.sendOrderStatus(order);
-        sender.sendOrderNotification(order);
+        // Send notification with successful payment message
+        String successMessage = "Payment successful. Amount: $" + order.getTotalPrice();
+        sender.sendOrderNotification(order, successMessage);       
         paymentRepository.save(payment);
         return true;
     }
 
+    public double getBalance(String token) {
+        String role = extractRoleFromToken(token);
+        if(role == null || !role.equals("CUSTOMER")) {
+            throw new RuntimeException("Unauthorized access: Invalid role");
+        }
+        String username = extractUsernameFromToken(token);
+        Payment payment = paymentRepository.findPaymentByCustomerUsername(username);
+        if(payment == null) {
+            throw new RuntimeException("Payment not found for user: " + username);
+        }
+        return payment.getBalance();
+    }
 }

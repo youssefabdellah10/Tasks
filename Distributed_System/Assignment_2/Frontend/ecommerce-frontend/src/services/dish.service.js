@@ -40,8 +40,7 @@ const DishService = {
     } catch (error) {
       throw error;
     }
-  },
-  updateDish: async (dishId, dishData) => {
+  },  updateDish: async (dishId, dishData) => {
     try {
       const response = await dishApi.put(`/dishes/update/${dishId}`, dishData);
       return response.data;
@@ -49,7 +48,15 @@ const DishService = {
       throw error;
     }
   },
-  searchDishes: async (searchTerm) => {
+  updateStock: async (dishId, stockQuantity) => {
+    try {
+      const response = await dishApi.put(`/dishes/update/${dishId}`, { stock: stockQuantity });
+      return response.data;
+    } catch (error) {
+      console.error('Error updating stock:', error);
+      throw error;
+    }
+  },searchDishes: async (searchTerm) => {
     try {
       const dishes = await DishService.getAllDishes();
       if (!searchTerm) return dishes;
@@ -65,6 +72,15 @@ const DishService = {
       });
     } catch (error) {
       console.error('Error in searchDishes:', error);
+      throw error;
+    }
+  },
+  checkDishStock: async (items) => {
+    try {
+      const response = await dishApi.post('/dishes/check-stock', { items });
+      return response.data;
+    } catch (error) {
+      console.error('Error checking dish stock:', error);
       throw error;
     }
   }

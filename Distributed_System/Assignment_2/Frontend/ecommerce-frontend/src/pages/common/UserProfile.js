@@ -13,10 +13,6 @@ const UserProfile = () => {
   // User profile data
   const [profileData, setProfileData] = useState({
     username: '',
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
     userType: ''
   });
 
@@ -25,16 +21,9 @@ const UserProfile = () => {
       try {
         setLoading(true);
         setError('');
-
-        // For demonstration, we're using the current user data from context
-        // In a real app, you would fetch more detailed profile data from an API
         if (currentUser) {
           setProfileData({
             username: currentUser.userId || '',
-            name: currentUser.name || 'User',
-            email: currentUser.email || 'email@example.com',
-            phone: currentUser.phone || '',
-            address: currentUser.address || '',
             userType: currentUser.userType || ''
           });
         }
@@ -86,14 +75,8 @@ const UserProfile = () => {
               </div>
             ) : (
               <Row>
-                <Col md={6}>
+                <Col md={12}>
                   <p><strong>Username:</strong> {profileData.username}</p>
-                  <p><strong>Name:</strong> {profileData.name}</p>
-                  <p><strong>Email:</strong> {profileData.email}</p>
-                </Col>
-                <Col md={6}>
-                  <p><strong>Phone:</strong> {profileData.phone || 'Not provided'}</p>
-                  <p><strong>Address:</strong> {profileData.address || 'Not provided'}</p>
                   <p>
                     <strong>Account Type:</strong> 
                     <span className={`ms-2 badge bg-${getUserTypeBadgeColor(profileData.userType)}`}>

@@ -7,7 +7,6 @@ const AuthService = {
       const response = await userApi.post(`/user/login?username=${username}&password=${password}`);
       
       if (response.data.token) {
-        // Use our token utility to store token with expiration
         tokenUtils.setTokenWithExpiration(response.data.token);
         
         const role = response.data.role.toLowerCase();
@@ -21,8 +20,7 @@ const AuthService = {
     } catch (error) {
       throw error;
     }
-  },
-  register: async (username, password, customer_name, address, mobile_number) => {
+  },  register: async (username, password, customer_name, address, mobile_number) => {
     try {
       const customerData = {
         username,

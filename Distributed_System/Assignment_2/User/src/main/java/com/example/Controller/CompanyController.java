@@ -28,8 +28,6 @@ public class CompanyController {
                         .entity("No companies found")
                         .build();
             }
-            
-            // Extract only company names to avoid serialization issues
             List<String> companyNames = companies.stream()
                 .map(Company::getCompanyName)
                 .collect(java.util.stream.Collectors.toList());

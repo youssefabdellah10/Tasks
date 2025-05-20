@@ -24,12 +24,11 @@ const Login = () => {
       
       // Redirect based on user type from response
       const role = userData.role.toLowerCase();
-      switch (role) {
-        case 'admin':
+      switch (role) {        case 'admin':
           navigate('/admin/dashboard');
           break;
         case 'seller':
-          navigate('/seller/dashboard');
+          navigate('/seller/dishes');
           break;
         case 'customer':
           navigate('/customer/dishes');

@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faSignOutAlt, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 import AuthContext from '../../contexts/AuthContext';
 import CartContext from '../../contexts/CartContext';
+import NotificationBar from './NotificationBar';
 
 const MainNavbar = () => {
   const { currentUser, logout } = useContext(AuthContext);
@@ -29,14 +30,10 @@ const MainNavbar = () => {
                 <Nav.Link as={Link} to="/admin/sellers/create">Create Seller</Nav.Link>
                 <Nav.Link as={Link} to="/admin/companies/view">View Companies</Nav.Link>
               </>
-            )}
-
-            {/* Seller Navigation Links */}
+            )}            {/* Seller Navigation Links */}
             {currentUser && currentUser.userType === 'seller' && (
               <>
-                <Nav.Link as={Link} to="/seller/dashboard">Dashboard</Nav.Link>
                 <Nav.Link as={Link} to="/seller/dishes">My Dishes</Nav.Link>
-                <Nav.Link as={Link} to="/seller/orders">Orders</Nav.Link>
               </>
             )}            {/* Customer Navigation Links */}
             {currentUser && currentUser.userType === 'customer' && (
@@ -53,11 +50,12 @@ const MainNavbar = () => {
             )}
           </Nav>
 
-          {/* Right-aligned navigation items */}
-          <Nav>
+          {/* Right-aligned navigation items */}          <Nav>
             {currentUser ? (
               <>
-                {/* Cart functionality removed */}
+                {/* Notification Bar - Only for customers */}
+                {currentUser.userType === 'customer' && <NotificationBar />}
+                
                 <NavDropdown 
                   title={<><FontAwesomeIcon icon={faUser} /> Account</>} 
                   id="account-dropdown"

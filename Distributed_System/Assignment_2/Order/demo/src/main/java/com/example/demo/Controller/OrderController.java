@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/orders")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"}, allowedHeaders = "*", allowCredentials = "false")
+@CrossOrigin(origins = {"http://localhost:3000"}, allowedHeaders = "*", allowCredentials = "false")
 public class OrderController {
 
     private final OrderService orderService;
@@ -63,9 +63,15 @@ public class OrderController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error processing payment: " + e.getMessage());
         }
+    }    @GetMapping("/mybalance")
+    public ResponseEntity<?> getBalance(@RequestHeader("Authorization") String token) {
+        try {
+            double balance = orderService.getBalance(token);
+            return ResponseEntity.ok(balance);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error retrieving balance: " + e.getMessage());
+        }
     }
-
-    
 }
 
 

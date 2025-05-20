@@ -10,11 +10,10 @@
     <packaging>war</packaging>
     
     <name>Java EE Hello World</name>
-    <description>A simple Java EE Hello World application for WildFly 26</description>
-      <properties>
+    <description>A simple Java EE Hello World application for WildFly 26</description>      <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <jakartaee.version>10.0.0</jakartaee.version>
     </properties>
     
@@ -94,15 +93,14 @@
     </dependencies>
       <build>
         <finalName>users</finalName>
-        <plugins>
-            <plugin>
+        <plugins>            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.10.1</version>
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
-                    <release>11</release>
+                    <release>17</release>
                 </configuration>
             </plugin>
             <plugin>
@@ -112,18 +110,31 @@
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
-            </plugin>
-            <!-- WildFly plugin for deployment -->
+            </plugin>            <!-- WildFly plugin for deployment -->
             <plugin>
                 <groupId>org.wildfly.plugins</groupId>
                 <artifactId>wildfly-maven-plugin</artifactId>
-                <version>2.1.0.Final</version>                <configuration>
+                <version>4.2.0.Final</version>                
+                <configuration>
                     <hostname>localhost</hostname>
                     <port>9990</port>
                     <username>admin</username>
                     <password>admin</password>
                     <javaOpts>-Djboss.http.port=7000</javaOpts>
-                    <jbossHome>../wildfly-36.0.0.Final</jbossHome>
+                    <jbossHome>C:\Users\youss\Downloads\wildfly-36.0.0.Final</jbossHome>
+                    <startupTimeout>120</startupTimeout>
+                    <check-packaging>false</check-packaging>
+                    <add-user>
+                        <users>
+                            <user>
+                                <username>admin</username>
+                                <password>admin</password>
+                                <groups>
+                                    <group>admin</group>
+                                </groups>
+                            </user>
+                        </users>
+                    </add-user>
                 </configuration>
             </plugin>
         </plugins>

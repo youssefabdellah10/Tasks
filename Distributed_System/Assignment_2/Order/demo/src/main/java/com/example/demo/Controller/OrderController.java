@@ -54,6 +54,10 @@ public class OrderController {
     public ResponseEntity<?> payOrder(@QueryParam("orderId") String orderId, 
                                         @RequestHeader("Authorization") String token) {
         try {
+            boolean ismetMinCharge = orderService.ismetMinCharge(orderId);
+            if(!ismetMinCharge){
+                return ResponseEntity.status(400).body("Minimum charge not met");
+            }
             boolean isPaid = orderService.ispaid(token, orderId);
             if(isPaid){
                return ResponseEntity.ok("Order is paid successfully");

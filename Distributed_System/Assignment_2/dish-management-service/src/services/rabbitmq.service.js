@@ -162,7 +162,7 @@ const consumeOrderStatus = async () => {
             await safeAck(msg);
             return;
           }
-          if (status === 'success' || status === 'completed') {
+          if (status === 'completed,paid successfully') {
             console.log(`Payment successful for order ${orderId}, updating stock`);
             
             try {

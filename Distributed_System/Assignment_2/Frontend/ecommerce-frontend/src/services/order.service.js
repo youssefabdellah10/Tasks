@@ -138,12 +138,21 @@ const OrderService = {
       return [];
     }
   },
-  
-  getCustomerBalance: async () => {
+    getCustomerBalance: async () => {
     try {
       const response = await orderApi.get('/orders/mybalance');
       console.log('Balance API response:', response.data);
-      return response.data;
+      // Parse the balance to ensure it's a number
+      let balance = 0;
+      if (response.data && response.data.balance !== undefined) {
+        // If the API returns an object with balance property
+        balance = parseFloat(response.data.balance);
+      } else if (response.data !== undefined) {
+        // If the API returns the balance directly
+        balance = parseFloat(response.data);
+      }
+      // Return a valid number or 0 if cannot be parsed
+      return isNaN(balance) ? 0 : balance;
     } catch (error) {
       console.error('Error fetching customer balance:', error);
       throw error;

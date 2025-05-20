@@ -62,7 +62,7 @@ public class OrderController {
             if(isPaid){
                return ResponseEntity.ok("Order is paid successfully");
             } else {
-                return ResponseEntity.status(400).body("faield to pay"); 
+                return ResponseEntity.status(400).body("faield to pay,payment not enough"); 
             }
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error processing payment: " + e.getMessage());

@@ -76,10 +76,20 @@ const CustomerOrders = () => {
         console.error('Error refreshing balance after payment:', balanceErr);
       }
       
-      setPaymentSuccess('Payment successful!');
-    } catch (err) {
+      setPaymentSuccess('Payment successful!');    } catch (err) {
       console.error('Error processing payment:', err);
-      setPaymentError('Payment failed. Please try again.');
+      
+      // Extract the specific error message from the API response
+      let errorMessage = 'Payment failed. Please try again.';
+      if (err.response && err.response.data) {
+        // If the API returns a string message directly
+        errorMessage = err.response.data;
+      } else if (err.message) {
+        // If there's a message property in the error object
+        errorMessage = err.message;
+      }
+      
+      setPaymentError(errorMessage);
     } finally {
       setPaymentLoading(false);
     }

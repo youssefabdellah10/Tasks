@@ -22,20 +22,16 @@ public class Receiver {
         // Declare the queue
         channel.queueDeclare(QUEUE_NAME, true, false, false, null);
         System.out.println("[*] Waiting for messages in " + QUEUE_NAME);
-        
-        // Create a latch to wait for a message
         final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
         final double[] totalprice = {-1.0}; // Default value
-        
-        // Set up our consumer
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             try {
                 totalprice[0] = Double.parseDouble(message);
-                System.out.println("[✓] Received total price from dish service: " + message);
-                latch.countDown(); // Release the latch when we get a message
+                System.out.println("Received total price from dish service: " + message);
+                latch.countDown(); 
             } catch (NumberFormatException e) {
-                System.err.println("[!] Could not parse price from message: " + message);
+                System.err.println("Could not parse price from message: " + message);
             }
         };
 
@@ -44,7 +40,6 @@ public class Receiver {
         // Wait for a message - but with a timeout
         boolean received = latch.await(10, java.util.concurrent.TimeUnit.SECONDS);
         
-        // Clean up
         channel.basicCancel(consumerTag);
         channel.close();
         connection.close();

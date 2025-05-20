@@ -169,16 +169,6 @@ public class OrderService {
         if(order == null) {
             throw new RuntimeException("Order not found");
         }
-        sender.sendOrder(order);
-            try {
-            System.out.println("Sleeping for 3 seconds...");
-            Thread.sleep(3000);
-        } catch (InterruptedException ie) {
-            Thread.currentThread().interrupt();
-            System.err.println("Sleep interrupted: " + ie.getMessage());
-        }
-            double totalPrice = receiver.receiveStoc();
-            order.setTotalPrice(totalPrice);
         String role = extractRoleFromToken(token);
         if(role == null || !role.equals("CUSTOMER")) {
             throw new RuntimeException("Unauthorized access: Invalid role");
